@@ -20,12 +20,10 @@ public class UserRepository {
 
     public User save(User user) throws ExecutionException, InterruptedException {
         if (user.getId() == null) {
-            // Auto-generate document ID
             DocumentReference docRef = firestore.collection(COLLECTION_NAME).document();
             user.setId(docRef.getId());
-            docRef.set(user).get(); // blocking
+            docRef.set(user).get();
         } else {
-            // Update existing user
             firestore.collection(COLLECTION_NAME).document(user.getId()).set(user).get();
         }
         return user;
