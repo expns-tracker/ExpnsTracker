@@ -19,14 +19,20 @@ public class UserRepository {
     private final String COLLECTION_NAME = "users";
 
     public User save(User user) throws ExecutionException, InterruptedException {
+        DocumentReference docRef;
+
         if (user.getId() == null) {
-            DocumentReference docRef = firestore.collection(COLLECTION_NAME).document();
+            docRef = firestore.collection(COLLECTION_NAME).document();
             user.setId(docRef.getId());
             docRef.set(user).get();
         } else {
-            firestore.collection(COLLECTION_NAME).document(user.getId()).set(user).get();
+            docRef = firestore.collection(COLLECTION_NAME).document(user.getId());
+            user.setUpdatedAt(null);
+            docRef.set(user).get();
         }
-        return user;
+
+        DocumentSnapshot snapshot = docRef.get().get();
+        return snapshot.toObject(User.class);
     }
 
     public User findById(String id) throws ExecutionException, InterruptedException {
