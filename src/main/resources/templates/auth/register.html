@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Register</title>
+    <!-- Materialize CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link th:href="@{/css/register.css}" rel="stylesheet">
+    <style>
+
+    </style>
+</head>
+<body>
+
+<div class="card z-depth-3">
+    <h4 class="center-align">Create Account</h4>
+    <br />
+
+    <div class="error-message" id="error-message"></div>
+
+    <form onsubmit="signup(); return false;">
+        <div class="input-field">
+            <input id="email" type="email" class="validate" required>
+            <label for="email">Email</label>
+        </div>
+
+        <div class="input-field">
+            <input id="password" type="password" class="validate" required>
+            <label for="password">Password</label>
+            <i class="material-icons toggle-password" onclick="togglePassword('password', this)">visibility</i>
+        </div>
+
+        <div class="input-field">
+            <input id="confirm-password" type="password" class="validate" required>
+            <label for="confirm-password">Confirm Password</label>
+            <i class="material-icons toggle-password" onclick="togglePassword('confirm-password', this)">visibility</i>
+            <span class="helper-text" id="confirm-error" data-error="Passwords do not match"></span>
+        </div>
+
+        <button class="btn waves-effect waves-light right" type="submit">
+            Sign Up
+        </button>
+        <br /><br />
+        <p class="center-align" style="margin-top: 1rem;">
+            Already have an account? <a th:href="@{/login}">Login</a>
+        </p>
+    </form>
+</div>
+
+<!-- Materialize JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+<script type="module" th:src="@{/js/register.js}"></script>
+
+</body>
+</html>
