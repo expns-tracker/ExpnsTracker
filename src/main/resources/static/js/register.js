@@ -25,7 +25,7 @@ function formatFirebaseError(error) {
         case 'auth/network-request-failed':
             return 'Network error. Please try again.';
         default:
-            return error.message;
+            return "An unknown error occurred.";
     }
 }
 
@@ -54,8 +54,10 @@ window.signup = function (event) {
             // user created successfully
             const idToken = await userCredential.user.getIdToken();
 
+            console.log(idToken);
+
             // Send token to Spring Boot to create session (same as login)
-            const res = await fetch("/session-login", {
+            const res = await fetch("api/auth/session-login", {
                 method: "POST",
                 headers: {
                     "Authorization": "Bearer " + idToken
@@ -63,6 +65,7 @@ window.signup = function (event) {
             });
 
             if (res.ok) {
+                console.log(res.body);
                 window.location.href = "/";
             }
         })
@@ -70,5 +73,6 @@ window.signup = function (event) {
             const errorDiv = document.getElementById('error-message');
             errorDiv.textContent = formatFirebaseError(error);
             errorDiv.style.display = 'block';
+            console.error(error);
         });
 }
