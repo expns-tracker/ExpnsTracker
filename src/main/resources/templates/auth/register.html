@@ -36,10 +36,23 @@
             <i class="material-icons toggle-password" onclick="togglePassword('confirm-password', this)">visibility</i>
             <span class="helper-text" id="confirm-error" data-error="Passwords do not match"></span>
         </div>
+        <div class="center-align">
 
-        <button class="btn waves-effect waves-light right" type="submit">
+        <button class="btn waves-effect waves-light" type="submit">
             Sign Up
         </button>
+        </div>
+        <hr>
+        <!-- Buton Google Sign-In -->
+        <!-- Google Sign-In Button simplu -->
+        <div class="center-align" style="margin-top: 1rem;">
+            <button type="button" onclick="signInWithGoogle()" class="btn red darken-1 black-text" style="width: 100%; max-width: 300px;">
+                Sign in with Google
+            </button>
+        </div>
+
+
+
         <br /><br />
         <p class="center-align" style="margin-top: 1rem;">
             Already have an account? <a th:href="@{/login}">Login</a>

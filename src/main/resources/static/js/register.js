@@ -1,7 +1,9 @@
 import {app} from "/js/firebase/firebase-config.js";
-import {getAuth, createUserWithEmailAndPassword} from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
+import {getAuth, createUserWithEmailAndPassword, GoogleAuthProvider ,
+    signInWithPopup } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
 
 const auth = getAuth(app);
+const googleProvider = new GoogleAuthProvider();
 
 function togglePassword(inputId, el) {
     const input = document.getElementById(inputId);
@@ -74,5 +76,32 @@ window.signup = function (event) {
             errorDiv.textContent = formatFirebaseError(error);
             errorDiv.style.display = 'block';
             console.error(error);
+        });
+}
+window.signInWithGoogle = function () {
+    signInWithPopup(auth, googleProvider)
+        .then(async (result) => {
+            const user = result.user;
+            const idToken = await user.getIdToken();
+
+            console.log("Google user:", user);
+
+            // Trimite token-ul la backend pentru crearea sesiunii
+            const res = await fetch("api/auth/session-login", {
+                method: "POST",
+                headers: {
+                    "Authorization": "Bearer " + idToken
+                }
+            });
+
+            if (res.ok) {
+                window.location.href = "/";
+            }
+        })
+        .catch((error) => {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.textContent = formatFirebaseError(error);
+            errorDiv.style.display = 'block';
+            console.error("Google Sign-In Error:", error);
         });
 }
