@@ -19,7 +19,6 @@ public class User extends Auditable{
 
     private String email;
     private String name;
-    private String passwordHash;
 
     private Role role;
     private Currency currency;
@@ -31,4 +30,7 @@ public class User extends Auditable{
     private Boolean isVerified = false;
 
     private List<String> feedbackIds;
+
+    private String tinkAccessToken;
+    private String tinkRefreshToken;
 }
