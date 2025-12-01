@@ -1,5 +1,6 @@
 package org.expns_tracker.ExpnsTracker.service;
 
+import lombok.extern.log4j.Log4j2;
 import org.expns_tracker.ExpnsTracker.config.TinkProperties;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -7,9 +8,10 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
-import tools.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.JsonNode;
 
 @Service
+@Log4j2
 public class TinkService {
     final TinkProperties tinkProperties;
     final WebClient webClient;
@@ -35,7 +37,7 @@ public class TinkService {
         bodyValues.add("client_id", this.tinkProperties.getClientId());
         bodyValues.add("client_secret", this.tinkProperties.getClientSecret());
         bodyValues.add("grant_type", "authorization_code");
-
+        log.info("bodyValues: {}", bodyValues);
         JsonNode response = this.webClient.post()
                 .uri("api/v1/oauth/token")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -48,7 +50,7 @@ public class TinkService {
             throw new RuntimeException("Failed to get token");
         }
 
-        return response.get("access_token").asString();
+        return response.get("access_token").asText();
     }
 
     public JsonNode fetchTransactions(String accessToken) {
