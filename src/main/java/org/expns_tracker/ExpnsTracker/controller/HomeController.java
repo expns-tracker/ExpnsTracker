@@ -17,7 +17,6 @@ public class HomeController {
 
     @GetMapping("/register")
     public String register(){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (isAuthenticated()) {
             return "redirect:/home";
@@ -27,7 +26,6 @@ public class HomeController {
 
     @GetMapping("/login")
     public String login(){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (isAuthenticated()) {
             return "redirect:/";
