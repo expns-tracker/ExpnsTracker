@@ -3,8 +3,9 @@ package org.expns_tracker.ExpnsTracker.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.expns_tracker.ExpnsTracker.service.TinkService;
+import org.expns_tracker.ExpnsTracker.service.UserService;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,14 +18,17 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Log4j2
 public class TinkController {
     final TinkService tinkService;
+    final UserService userService;
 
-//    @GetMapping("/connect")
-//    public String startConnection(){
-//        return "redirect:" + this.tinkService.generateTinkLinkUrl();
-//    }
+    @GetMapping("/connect")
+    public String startConnection(@AuthenticationPrincipal String userId){
+        String tinkUserId = userService.getTinkUserId(userId);
+        log.info("tinkUserId: {}", tinkUserId);
+        return "redirect:" + this.tinkService.generateTinkLinkUrl(tinkUserId);
+    }
 
     @GetMapping("/callback")
-    public String callback(@RequestParam(required = false) String code,
+    public String callback(@AuthenticationPrincipal String userId,
                            @RequestParam(required = false) String error,
                            RedirectAttributes redirectAttributes) {
 
@@ -36,18 +40,15 @@ public class TinkController {
             return "redirect:/";
         }
 
-        if (code == null) {
-            log.error("Callback received but code is null!");
-            redirectAttributes.addFlashAttribute(
-                    "errorMessage", "Failed to authenticate: authorization code missing."
-            );
-            return "redirect:/";
-        }
+        String tinkUserId = userService.getTinkUserId(userId);
+
+        String code = this.tinkService.getUserAccessCode(tinkUserId);
 
         try {
-            String accessToken = String.valueOf(this.tinkService.getTokens(code));
+            log.info("Callback received for code: {}", code);
+            String token = this.tinkService.getAccessToken(code);
 
-            JsonNode transactionsJson = this.tinkService.fetchTransactions(accessToken);
+            JsonNode transactionsJson = this.tinkService.fetchTransactions(token);
             log.info("Transactions JSON: {}", transactionsJson.toString());
 
             redirectAttributes.addFlashAttribute(

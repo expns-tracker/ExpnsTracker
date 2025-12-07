@@ -33,7 +33,7 @@ public class TinkService {
         bodyValues.add("grant_type", "client_credentials");
         bodyValues.add("client_id", this.tinkProperties.getClientId());
         bodyValues.add("client_secret", this.tinkProperties.getClientSecret());
-        bodyValues.add("scope", "user:create authoriazation:grant");
+        bodyValues.add("scope", "user:create authorization:grant");
 
         JsonNode response = this.webClient.post()
                 .uri("api/v1/oauth/token")
@@ -46,6 +46,7 @@ public class TinkService {
         if (response == null || !response.has("access_token")) {
             throw new RuntimeException("Failed to get client access token");
         }
+
         return response.get("access_token").asText();
     }
 
@@ -79,7 +80,8 @@ public class TinkService {
         MultiValueMap<String, String> bodyValues = new LinkedMultiValueMap<>();
         bodyValues.add("user_id", tinkUserId);
         bodyValues.add("actor_client_id", TinkProperties.TINK_LINK_ACTOR_ID);
-        bodyValues.add("scope", "accounts:read,transactions:read,credentials:read,credentials:refresh");
+        bodyValues.add("scope", "authorization:read,authorization:grant,credentials:refresh,credentials:read,credentials:write,providers:read,user:read");
+        bodyValues.add("id_hint", "Expense Tracker User");
 
         JsonNode response = this.webClient.post()
                 .uri("/api/v1/oauth/authorization-grant/delegate")
@@ -96,22 +98,46 @@ public class TinkService {
 
         String authorizationCode = response.get("code").asText();
 
-        return "https://link.tink.com/1.0/transactions/connect-accounts" +
+        return "https://link.tink.com/1.0/credentials/add" +
                 "?client_id=" + this.tinkProperties.getClientId() +
                 "&redirect_uri=" + this.tinkProperties.getRedirectUri() +
-                "&market=GB" +
-                "&authorization_code=" + authorizationCode;
+                "&authorization_code=" + authorizationCode +
+                "&test=true";
 
     }
 
-    public JsonNode getTokens(String code) {
+    public String getUserAccessCode(String tinkUserId){
+        String clientToken = getClientAppToken();
+
+        MultiValueMap<String, String> bodyValues = new LinkedMultiValueMap<>();
+        bodyValues.add("user_id", tinkUserId);
+        bodyValues.add("scope", "accounts:read,balances:read,transactions:read,provider-consents:read");
+
+        JsonNode response = this.webClient.post()
+                .uri("/api/v1/oauth/authorization-grant")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + clientToken)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .body(BodyInserters.fromFormData(bodyValues))
+                .retrieve()
+                .bodyToMono(JsonNode.class)
+                .block();
+
+        if (response == null || !response.has("code")) {
+            throw new RuntimeException("Failed to get user access code");
+        }
+
+        return response.get("code").asText();
+
+    }
+
+    public String getAccessToken(String code) {
         MultiValueMap<String, String> bodyValues = new LinkedMultiValueMap<>();
         bodyValues.add("code", code);
         bodyValues.add("client_id", this.tinkProperties.getClientId());
         bodyValues.add("client_secret", this.tinkProperties.getClientSecret());
         bodyValues.add("grant_type", "authorization_code");
 
-        log.info("Exchanging code for tokens...");
+        log.info("Exchanging code for access token...");
 
         JsonNode response = webClient.post()
                 .uri("/api/v1/oauth/token")
@@ -121,30 +147,8 @@ public class TinkService {
                 .bodyToMono(JsonNode.class)
                 .block();
 
-        if (response == null) {
-            throw new RuntimeException("Failed to get tokens");
-        }
-
-        return response;
-    }
-
-    public String refreshAccessToken(String refreshToken) {
-        MultiValueMap<String, String> bodyValues = new LinkedMultiValueMap<>();
-        bodyValues.add("refresh_token", refreshToken);
-        bodyValues.add("client_id", this.tinkProperties.getClientId());
-        bodyValues.add("client_secret", this.tinkProperties.getClientSecret());
-        bodyValues.add("grant_type", "refresh_token");
-
-        JsonNode response = this.webClient.post()
-                .uri("/api/v1/oauth/token")
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .body(BodyInserters.fromFormData(bodyValues))
-                .retrieve()
-                .bodyToMono(JsonNode.class)
-                .block();
-
         if (response == null ||  !response.has("access_token")) {
-            throw new RuntimeException("Failed to refresh access token");
+            throw new RuntimeException("Failed to get access token");
         }
 
         return response.get("access_token").asText();

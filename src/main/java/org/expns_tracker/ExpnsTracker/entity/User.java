@@ -31,6 +31,5 @@ public class User extends Auditable{
 
     private List<String> feedbackIds;
 
-    private String tinkAccessToken;
-    private String tinkRefreshToken;
+    private String tinkUserId;
 }

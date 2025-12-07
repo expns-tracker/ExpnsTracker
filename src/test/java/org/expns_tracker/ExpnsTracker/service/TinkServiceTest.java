@@ -15,6 +15,8 @@ import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+
+
 class TinkServiceTest {
 
     private MockWebServer mockWebServer;
@@ -133,53 +135,24 @@ class TinkServiceTest {
     }
 
     @Test
-    void refreshAccessToken_Success() throws InterruptedException {
-
-        mockWebServer.enqueue(new MockResponse()
-                .setBody("{\"access_token\": \"new-access-token\", \"expires_in\": 1800}")
-                .addHeader("Content-Type", "application/json"));
-
-        String newToken = tinkService.refreshAccessToken("valid-refresh-token");
-
-        assertEquals("new-access-token", newToken);
-
-        RecordedRequest request = mockWebServer.takeRequest();
-        String body = request.getBody().readUtf8();
-        assertTrue(body.contains("grant_type=refresh_token"));
-        assertTrue(body.contains("refresh_token=valid-refresh-token"));
-    }
-
-    @Test
-    void refreshAccessToken_Failure(){
-
-        mockWebServer.enqueue(new MockResponse()
-                .addHeader("Content-Type", "application/json"));
-
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> tinkService.refreshAccessToken("valid-refresh-token"));
-
-        assertEquals("Failed to refresh access token", exception.getMessage());
-    }
-
-    @Test
-    void getTokens_Success() {
+    void getAccessToken_Success() {
         mockWebServer.enqueue(new MockResponse()
                 .setBody("{\"access_token\": \"new-access-token\", \"expires_in\": 1800 , \"refresh_token\": \"new-refresh-token\"}")
                 .addHeader("Content-Type", "application/json"));
 
-        JsonNode response = tinkService.getTokens("new-access-code");
+        String token = tinkService.getAccessToken("new-access-code");
 
-        assertNotNull(response);
-        assertEquals("new-access-token", response.get("access_token").asText());
-        assertEquals("new-refresh-token", response.get("refresh_token").asText());
+        assertNotNull(token);
+        assertEquals("new-access-token", token);
     }
 
     @Test
-    void getTokens_Failure() {
+    void getAccessToken_Failure() {
         mockWebServer.enqueue(new MockResponse().setResponseCode(200));
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> tinkService.getTokens("new-access-code"));
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> tinkService.getAccessToken("new-access-code"));
 
-        assertEquals("Failed to get tokens", exception.getMessage());
+        assertEquals("Failed to get access token", exception.getMessage());
     }
 
     @Test
@@ -220,5 +193,39 @@ class TinkServiceTest {
         assertThrows(Exception.class, () -> {
             tinkService.fetchTransactions("expired-token");
         });
+    }
+
+    @Test
+    void getUserAccessCode_Success() {
+
+        mockWebServer.enqueue(new MockResponse()
+                .setBody("{\"access_token\": \"fake-app-token\"}")
+                .addHeader("Content-Type", "application/json"));
+
+        mockWebServer.enqueue(new MockResponse()
+                .setBody("{\"code\": \"fake-user-code\"}")
+                .addHeader("Content-Type", "application/json"));
+
+        String code = tinkService.getUserAccessCode("fake-tink-user-id");
+
+        assertNotNull(code);
+        assertEquals("fake-user-code", code);
+    }
+
+    @Test
+    void getUserAccessCode_Failure() {
+
+        mockWebServer.enqueue(new MockResponse()
+                .setBody("{\"access_token\": \"fake-app-token\"}")
+                .addHeader("Content-Type", "application/json"));
+
+        mockWebServer.enqueue(new MockResponse()
+                .addHeader("Content-Type", "application/json"));
+
+        RuntimeException exception = assertThrows(RuntimeException.class,
+                () -> tinkService.getUserAccessCode("fake-tink-user-id")
+        );
+
+        assertEquals("Failed to get user access code", exception.getMessage());
     }
 }
