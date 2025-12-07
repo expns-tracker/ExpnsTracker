@@ -18,10 +18,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class TinkController {
     final TinkService tinkService;
 
-    @GetMapping("/connect")
-    public String startConnection(){
-        return "redirect:" + this.tinkService.getTinkLinkUrl();
-    }
+//    @GetMapping("/connect")
+//    public String startConnection(){
+//        return "redirect:" + this.tinkService.generateTinkLinkUrl();
+//    }
 
     @GetMapping("/callback")
     public String callback(@RequestParam(required = false) String code,
@@ -45,7 +45,7 @@ public class TinkController {
         }
 
         try {
-            String accessToken = this.tinkService.getAccessToken(code);
+            String accessToken = String.valueOf(this.tinkService.getTokens(code));
 
             JsonNode transactionsJson = this.tinkService.fetchTransactions(accessToken);
             log.info("Transactions JSON: {}", transactionsJson.toString());

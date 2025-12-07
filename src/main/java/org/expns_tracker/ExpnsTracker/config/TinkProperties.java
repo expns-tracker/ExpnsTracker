@@ -10,4 +10,6 @@ public class TinkProperties {
     String clientSecret;
     String redirectUri;
     String apiUrl;
+
+    public static final String TINK_LINK_ACTOR_ID = "df05e4b379934cd09963197cc855bfe9";
 }
