@@ -13,6 +13,8 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import com.fasterxml.jackson.databind.JsonNode;
 
+import java.time.LocalDate;
+
 @Service
 @Log4j2
 public class TinkService {
@@ -33,7 +35,7 @@ public class TinkService {
         bodyValues.add("grant_type", "client_credentials");
         bodyValues.add("client_id", this.tinkProperties.getClientId());
         bodyValues.add("client_secret", this.tinkProperties.getClientSecret());
-        bodyValues.add("scope", "user:create authorization:grant");
+        bodyValues.add("scope", "user:create user:delete authorization:grant");
 
         JsonNode response = this.webClient.post()
                 .uri("api/v1/oauth/token")
@@ -98,7 +100,7 @@ public class TinkService {
 
         String authorizationCode = response.get("code").asText();
 
-        return "https://link.tink.com/1.0/credentials/add" +
+        return "https://link.tink.com/1.0/transactions/connect-accounts" +
                 "?client_id=" + this.tinkProperties.getClientId() +
                 "&redirect_uri=" + this.tinkProperties.getRedirectUri() +
                 "&authorization_code=" + authorizationCode +
@@ -111,7 +113,7 @@ public class TinkService {
 
         MultiValueMap<String, String> bodyValues = new LinkedMultiValueMap<>();
         bodyValues.add("user_id", tinkUserId);
-        bodyValues.add("scope", "accounts:read,balances:read,transactions:read,provider-consents:read");
+        bodyValues.add("scope", "accounts:read,balances:read,transactions:read,provider-consents:read,credentials:read");
 
         JsonNode response = this.webClient.post()
                 .uri("/api/v1/oauth/authorization-grant")
@@ -156,7 +158,20 @@ public class TinkService {
 
     public JsonNode fetchTransactions(String accessToken) {
         return webClient.get()
-                .uri("/data/v2/transactions")
+                .uri(uriBuilder -> uriBuilder
+                        .path("/data/v2/transactions")
+                        .queryParam("bookedDateGte", LocalDate.now().minusMonths(1))
+                        .build()
+                )
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+                .retrieve()
+                .bodyToMono(JsonNode.class)
+                .block();
+    }
+
+    public JsonNode listCredentials(String accessToken) {
+        return webClient.get()
+                .uri("/api/v1/credentials/list")
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
                 .retrieve()
                 .bodyToMono(JsonNode.class)

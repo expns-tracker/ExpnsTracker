@@ -47,7 +47,6 @@ public class TinkController {
         try {
             log.info("Callback received for code: {}", code);
             String token = this.tinkService.getAccessToken(code);
-
             JsonNode transactionsJson = this.tinkService.fetchTransactions(token);
             log.info("Transactions JSON: {}", transactionsJson.toString());
 
@@ -58,6 +57,29 @@ public class TinkController {
         } catch (Exception e) {
             log.error("Exception during bank sync", e);
             redirectAttributes.addFlashAttribute("errorMessage", "Server error during bank sync: " + e.getMessage());
+        }
+
+        return "redirect:/";
+    }
+
+    @GetMapping("/load-transactions")
+    public String loadTransactions(@AuthenticationPrincipal String userId,
+                                   RedirectAttributes redirectAttributes) {
+        String tinkUserId = userService.getTinkUserId(userId);
+        try {
+            String code = this.tinkService.getUserAccessCode(tinkUserId);
+            String token = this.tinkService.getAccessToken(code);
+            JsonNode transactions = this.tinkService.fetchTransactions(token);
+            log.info("Transactions JSON: {}", transactions.toString());
+
+            redirectAttributes.addFlashAttribute(
+                    "successMessage", "Successfully loaded transactions!"
+            );
+        } catch (Exception e) {
+            log.error("Exception during loading transactions", e);
+            redirectAttributes.addFlashAttribute(
+                    "errorMessage", "Server error during loading transactions!"
+            );
         }
 
         return "redirect:/";

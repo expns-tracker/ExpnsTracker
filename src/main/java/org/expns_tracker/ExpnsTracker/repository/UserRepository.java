@@ -65,4 +65,13 @@ public class UserRepository {
                 .map(doc -> doc.toObject(User.class))
                 .collect(Collectors.toList());
     }
+
+    public List<User> findAllByTinkUserIdNotNull() throws ExecutionException, InterruptedException {
+        CollectionReference users = firestore.collection(COLLECTION_NAME);
+        ApiFuture<QuerySnapshot> future = users.whereEqualTo("tinkUserId", null).get();
+        List<QueryDocumentSnapshot> documents = future.get().getDocuments();
+        return documents.stream()
+                .map(doc -> doc.toObject(User.class))
+                .collect(Collectors.toList());
+    }
 }

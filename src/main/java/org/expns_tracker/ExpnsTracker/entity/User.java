@@ -1,7 +1,6 @@
 package org.expns_tracker.ExpnsTracker.entity;
 import com.google.cloud.firestore.annotation.DocumentId;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 import org.expns_tracker.ExpnsTracker.entity.enums.Currency;
 import org.expns_tracker.ExpnsTracker.entity.enums.Role;
 

@@ -35,6 +35,16 @@ public class UserService {
 
     }
 
+    public void setTinkUserId(String userId, String tinkUserId) {
+        User user = getUser(userId);
+        user.setTinkUserId(tinkUserId);
+        try {
+            userRepository.save(user);
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @NotNull
     private User getUser(String userId) {
         User user;

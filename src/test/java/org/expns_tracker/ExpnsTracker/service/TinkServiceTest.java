@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.IOException;
+import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -181,7 +182,7 @@ class TinkServiceTest {
 
         RecordedRequest request = mockWebServer.takeRequest();
 
-        assertEquals("/data/v2/transactions", request.getPath());
+        assertEquals("/data/v2/transactions?bookedDateGte=" + LocalDate.now().minusMonths(1), request.getPath());
 
         assertEquals("Bearer valid-access-token-123", request.getHeader("Authorization"));
     }
@@ -227,5 +228,37 @@ class TinkServiceTest {
         );
 
         assertEquals("Failed to get user access code", exception.getMessage());
+    }
+
+    @Test
+    void listCredentials_Success() throws InterruptedException {
+        // 1. Prepare Mock JSON Response
+        String mockResponse = """
+            {
+                "credentials": [
+                    {
+                        "id": "cred_123",
+                        "providerName": "uk-demobank-open-banking-redirect",
+                        "status": "UPDATED"
+                    }
+                ]
+            }
+            """;
+
+        mockWebServer.enqueue(new MockResponse()
+                .setBody(mockResponse)
+                .addHeader("Content-Type", "application/json"));
+
+        String accessToken = "valid-token";
+        JsonNode result = tinkService.listCredentials(accessToken);
+
+        assertNotNull(result);
+        assertEquals("cred_123", result.get("credentials").get(0).get("id").asText());
+        assertEquals("UPDATED", result.get("credentials").get(0).get("status").asText());
+
+        RecordedRequest request = mockWebServer.takeRequest();
+        assertEquals("/api/v1/credentials/list", request.getPath());
+        assertEquals("Bearer valid-token", request.getHeader("Authorization"));
+        assertEquals("GET", request.getMethod());
     }
 }
