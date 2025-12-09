@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.concurrent.ExecutionException;
+
 @RestController
 @RequiredArgsConstructor
 @Log4j2
@@ -31,7 +33,7 @@ public class AuthController {
             String authToken = authHeader.replace("Bearer ", "");
             authService.authenticateUser(authToken, session);
 
-        } catch (FirebaseAuthException e) {
+        } catch (FirebaseAuthException | ExecutionException | InterruptedException e) {
             log.error(e);
             return ResponseEntity.badRequest().body("Authentication failed");
         }

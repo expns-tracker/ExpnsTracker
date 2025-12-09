@@ -1,7 +1,6 @@
 package org.expns_tracker.ExpnsTracker.entity;
 import com.google.cloud.firestore.annotation.DocumentId;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 import org.expns_tracker.ExpnsTracker.entity.enums.Currency;
 import org.expns_tracker.ExpnsTracker.entity.enums.Role;
 
@@ -19,7 +18,6 @@ public class User extends Auditable{
 
     private String email;
     private String name;
-    private String passwordHash;
 
     private Role role;
     private Currency currency;
@@ -31,4 +29,6 @@ public class User extends Auditable{
     private Boolean isVerified = false;
 
     private List<String> feedbackIds;
+
+    private String tinkUserId;
 }
