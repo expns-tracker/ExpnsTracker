@@ -3,7 +3,7 @@ package org.expns_tracker.ExpnsTracker.service;
 import lombok.RequiredArgsConstructor;
 import org.expns_tracker.ExpnsTracker.entity.User;
 import org.expns_tracker.ExpnsTracker.repository.UserRepository;
-import org.jetbrains.annotations.NotNull;
+
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.ExecutionException;
@@ -45,7 +45,7 @@ public class UserService {
         }
     }
 
-    @NotNull
+
     private User getUser(String userId) {
         User user;
         try {
