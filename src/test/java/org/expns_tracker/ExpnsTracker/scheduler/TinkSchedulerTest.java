@@ -62,7 +62,7 @@ public class TinkSchedulerTest {
         for (User user : users) {
             lenient().when(tinkService.getUserAccessCode(user.getTinkUserId())).thenReturn("code-"+user.getId());
             lenient().when(tinkService.getAccessToken("code-"+user.getId())).thenReturn("token-"+user.getId());
-            lenient().when(tinkService.fetchTransactions("token-"+user.getId())).thenReturn(rootNode);
+            lenient().when(tinkService.fetchTransactions("token-"+user.getId(), null)).thenReturn(rootNode);
         }
 
         when(userRepository.findAllByTinkUserIdNotNull()).thenReturn(users);
@@ -80,11 +80,11 @@ public class TinkSchedulerTest {
 
         verify(tinkService).getUserAccessCode("tink-user-id-1");
         verify(tinkService).getAccessToken("code-user-id-1");
-        verify(tinkService).fetchTransactions("token-user-id-1");
+        verify(tinkService).fetchTransactions("token-user-id-1", null);
 
         verify(tinkService).getUserAccessCode("tink-user-id-2");
         verify(tinkService).getAccessToken("code-user-id-2");
-        verify(tinkService).fetchTransactions("token-user-id-2");
+        verify(tinkService).fetchTransactions("token-user-id-2", null);
 
         verifyNoMoreInteractions(tinkService);
 
@@ -101,7 +101,7 @@ public class TinkSchedulerTest {
 
         verify(tinkService).getUserAccessCode("tink-user-id-2");
         verify(tinkService).getAccessToken("code-user-id-2");
-        verify(tinkService).fetchTransactions("token-user-id-2");
+        verify(tinkService).fetchTransactions("token-user-id-2", null);
 
         verifyNoMoreInteractions(tinkService);
     }

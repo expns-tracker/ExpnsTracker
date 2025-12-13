@@ -47,7 +47,7 @@ public class TinkController {
         try {
             log.info("Callback received for code: {}", code);
             String token = this.tinkService.getAccessToken(code);
-            JsonNode transactionsJson = this.tinkService.fetchTransactions(token);
+            JsonNode transactionsJson = this.tinkService.fetchTransactions(token, null);
             log.info("Transactions JSON: {}", transactionsJson.toString());
 
             redirectAttributes.addFlashAttribute(
@@ -69,7 +69,7 @@ public class TinkController {
         try {
             String code = this.tinkService.getUserAccessCode(tinkUserId);
             String token = this.tinkService.getAccessToken(code);
-            JsonNode transactions = this.tinkService.fetchTransactions(token);
+            JsonNode transactions = this.tinkService.fetchTransactions(token, null);
             log.info("Transactions JSON: {}", transactions.toString());
 
             redirectAttributes.addFlashAttribute(

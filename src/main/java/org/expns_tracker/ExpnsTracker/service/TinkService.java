@@ -156,12 +156,19 @@ public class TinkService {
         return response.get("access_token").asText();
     }
 
-    public JsonNode fetchTransactions(String accessToken) {
+    public JsonNode fetchTransactions(String accessToken, String pageToken) {
         return webClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/data/v2/transactions")
-                        .queryParam("bookedDateGte", LocalDate.now().minusMonths(1))
-                        .build()
+                .uri(uriBuilder -> {
+                    uriBuilder
+                                    .path("/data/v2/transactions")
+                                    .queryParam("bookedDateGte", LocalDate.now().minusMonths(1));
+
+                    if (pageToken != null) {
+                        uriBuilder.queryParam("page", pageToken);
+                    }
+
+                    return uriBuilder.build();
+                    }
                 )
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
                 .retrieve()

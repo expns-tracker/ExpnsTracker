@@ -6,11 +6,13 @@ import lombok.extern.log4j.Log4j2;
 import org.expns_tracker.ExpnsTracker.entity.User;
 import org.expns_tracker.ExpnsTracker.repository.UserRepository;
 import org.expns_tracker.ExpnsTracker.service.TinkService;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 
 @Component
 @Log4j2
@@ -29,37 +31,44 @@ public class TinkScheduler {
         } catch (ExecutionException | InterruptedException e) {
             throw new RuntimeException(e);
         }
-
-        for  (User user : users) {
-            try {
-                syncUserTransactions(user);
-            } catch (Exception e) {
-                log.error(
-                        "Failed while syncing transactions for user {}:{}.",
-                        user.getEmail(),
-                        user.getName(),
-                        e
-                );
+        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            for (User user : users) {
+                executor.submit(() -> {
+                    try {
+                        syncUserTransactions(user);
+                    } catch (Exception e) {
+                        log.error(
+                                "Failed while syncing transactions for user {}:{}.",
+                                user.getEmail(),
+                                user.getName(),
+                                e
+                        );
+                    }
+                });
             }
         }
 
         log.info("Finished scheduled transaction sync...");
     }
 
-    private void syncUserTransactions(User user) {
+    private void syncUserTransactions(@NotNull User user) {
         log.info("Syncing transactions for user {}:{}", user.getEmail(), user.getName());
 
         String code = tinkService.getUserAccessCode(user.getTinkUserId());
 
         String accessToken = tinkService.getAccessToken(code);
+        String pageToken = null;
+        do{
+            JsonNode transactions = tinkService.fetchTransactions(accessToken, pageToken);
+            log.info(
+                    "Successfully synced {} transactions for user {}:{}",
+                    transactions.path("transactions").size(),
+                    user.getEmail(),
+                    user.getName()
+            );
+            pageToken = transactions.get("pageToken").asText();
+        } while (pageToken != null);
 
-        JsonNode transactions = tinkService.fetchTransactions(accessToken);
 
-        log.info(
-                "Successfully synced {} transactions for user {}:{}",
-                transactions.path("transactions").size(),
-                user.getEmail(),
-                user.getName()
-        );
     }
 }
