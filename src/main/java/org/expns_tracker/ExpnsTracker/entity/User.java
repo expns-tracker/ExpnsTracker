@@ -17,7 +17,8 @@ public class User extends Auditable{
     private String id;
 
     private String email;
-    private String name;
+    private String firstName;
+    private String lastName;
 
     private Role role;
     private Currency currency;
@@ -31,4 +32,10 @@ public class User extends Auditable{
     private List<String> feedbackIds;
 
     private String tinkUserId;
+    private Boolean profileCompleted;
+
+    public String name() {
+        return firstName + " " + lastName;
+    }
 }
+
