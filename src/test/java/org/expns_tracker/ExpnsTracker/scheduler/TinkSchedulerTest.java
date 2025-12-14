@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
+import net.javacrumbs.shedlock.core.LockProvider;
+import net.javacrumbs.shedlock.core.SimpleLock;
 import org.expns_tracker.ExpnsTracker.entity.User;
 import org.expns_tracker.ExpnsTracker.repository.UserRepository;
 import org.expns_tracker.ExpnsTracker.service.TinkService;
@@ -18,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 import static org.mockito.Mockito.*;
@@ -34,6 +37,13 @@ public class TinkSchedulerTest {
 
     @Mock
     private TinkService tinkService;
+
+    @Mock
+    private LockProvider lockProvider;
+
+    @Mock
+    private SimpleLock simpleLock;
+
 
     List<User> users = new ArrayList<>();
 
@@ -64,7 +74,7 @@ public class TinkSchedulerTest {
             lenient().when(tinkService.getAccessToken("code-"+user.getId())).thenReturn("token-"+user.getId());
             lenient().when(tinkService.fetchTransactions("token-"+user.getId(), null)).thenReturn(rootNode);
         }
-
+        lenient().when(lockProvider.lock(any())).thenReturn(Optional.of(simpleLock));
         when(userRepository.findAllByTinkUserIdNotNull()).thenReturn(users);
     }
 
@@ -132,6 +142,7 @@ public class TinkSchedulerTest {
 
         ObjectNode rootNode = mapper.createObjectNode();
         rootNode.set("transactions", resultsArray);
+        rootNode.put("nextPageToken", "");
         return rootNode;
     }
 }

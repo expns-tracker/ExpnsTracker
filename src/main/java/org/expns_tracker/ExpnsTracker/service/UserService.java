@@ -46,7 +46,7 @@ public class UserService {
     }
 
     @NotNull
-    private User getUser(String userId) {
+    public User getUser(String userId) {
         User user;
         try {
             user = userRepository.findById(userId);
