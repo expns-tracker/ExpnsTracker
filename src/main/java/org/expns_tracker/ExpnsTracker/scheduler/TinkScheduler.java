@@ -11,6 +11,7 @@ import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.expns_tracker.ExpnsTracker.entity.User;
 import org.expns_tracker.ExpnsTracker.repository.UserRepository;
 import org.expns_tracker.ExpnsTracker.service.TinkService;
+import org.expns_tracker.ExpnsTracker.service.TransactionService;
 import org.expns_tracker.ExpnsTracker.service.UserService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -18,7 +19,6 @@ import org.springframework.stereotype.Component;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -32,6 +32,7 @@ public class TinkScheduler {
     private final TinkService tinkService;
     private final LockProvider lockProvider;
     private final UserService userService;
+    private final TransactionService transactionService;
 
     @Scheduled(cron = "0 0 4 * * *")
     @SchedulerLock(name = "TinkSyncTask", lockAtLeastFor = "5m", lockAtMostFor = "1h")
@@ -109,6 +110,9 @@ public class TinkScheduler {
         String pageToken = null;
         do{
             JsonNode transactions = tinkService.fetchTransactions(accessToken, pageToken);
+            log.info("Transactions for user {}:{}", user.getEmail(), transactions);
+            transactionService.saveTinkTransactions(transactions, user.getId());
+
             log.info(
                     "Successfully synced {} transactions for user {}:{}",
                     transactions.path("transactions").size(),

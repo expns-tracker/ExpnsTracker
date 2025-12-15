@@ -2,6 +2,7 @@ package org.expns_tracker.ExpnsTracker.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.log4j.Log4j2;
 import org.expns_tracker.ExpnsTracker.config.TinkProperties;
 import org.springframework.http.HttpHeaders;
@@ -14,6 +15,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import java.time.LocalDate;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @Log4j2
@@ -21,6 +24,7 @@ public class TinkService {
     final TinkProperties tinkProperties;
     final WebClient webClient;
     private final ObjectMapper objectMapper;
+    private final Map<String, String> categoryParentCache = new ConcurrentHashMap<>();
 
     TinkService(TinkProperties tinkProperties, WebClient.Builder webClientBuilder, ObjectMapper objectMapper) {
         this.tinkProperties = tinkProperties;
@@ -164,7 +168,7 @@ public class TinkService {
                                     .queryParam("bookedDateGte", LocalDate.now().minusMonths(1));
 
                     if (pageToken != null) {
-                        uriBuilder.queryParam("page", pageToken);
+                        uriBuilder.queryParam("pageToken", pageToken);
                     }
 
                     return uriBuilder.build();
@@ -183,5 +187,32 @@ public class TinkService {
                 .retrieve()
                 .bodyToMono(JsonNode.class)
                 .block();
+    }
+
+    @PostConstruct
+    public void loadCategories() {
+        try {
+            JsonNode response = webClient.get()
+                    .uri("/api/v1/categories")
+                    .retrieve()
+                    .bodyToMono(JsonNode.class)
+                    .block();
+
+            if (response != null) {
+                for (JsonNode cat : response) {
+                    String id = cat.get("id").asText();
+                    String parent = cat.get("parent").asText();
+
+                    categoryParentCache.put(id, parent);
+                }
+                log.info("Loaded {} Tink categories.", categoryParentCache.size());
+            }
+        } catch (Exception e) {
+            log.error("Failed to load categories", e);
+        }
+    }
+
+    public String getCategoryParent(String id) {
+        return categoryParentCache.getOrDefault(id, null);
     }
 }
