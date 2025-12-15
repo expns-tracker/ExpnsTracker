@@ -61,6 +61,7 @@ public class AuthService {
         user = User.builder()
                 .id(uid)
                 .email(email)
+                .profileCompleted(false)
                 .build();
 
         userRepository.save(user);
