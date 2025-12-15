@@ -57,7 +57,6 @@ public class UserService {
         } catch (ExecutionException | InterruptedException e) {
             throw new RuntimeException(e);
         }
-
         if (user == null) {
             throw new RuntimeException("User not found");
         }

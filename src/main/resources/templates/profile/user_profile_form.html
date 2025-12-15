@@ -23,7 +23,7 @@
                     <span class="card-title center">Complete Profile</span>
 
                     <form th:action="@{/profile/complete}"
-                          th:object="${user}"
+                          th:object="${currentUser}"
                           method="post">
 
                         <!-- First Name -->

@@ -1,5 +1,7 @@
 package org.expns_tracker.ExpnsTracker.entity;
 import com.google.cloud.firestore.annotation.DocumentId;
+import com.google.cloud.firestore.annotation.Exclude;
+import com.google.cloud.firestore.annotation.IgnoreExtraProperties;
 import lombok.*;
 import org.expns_tracker.ExpnsTracker.entity.enums.Currency;
 import org.expns_tracker.ExpnsTracker.entity.enums.Role;
@@ -11,6 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@IgnoreExtraProperties
 public class User extends Auditable{
 
     @DocumentId
@@ -34,6 +37,7 @@ public class User extends Auditable{
     private String tinkUserId;
     private Boolean profileCompleted;
 
+    @Exclude
     public String getName() {
         return firstName + " " + lastName;
     }

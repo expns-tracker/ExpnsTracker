@@ -20,18 +20,13 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/complete")
-    public String showCompleteProfileForm(Model model, @AuthenticationPrincipal String userId) {
-
-        User user = userService.getUser(userId); // user logat
-
-        model.addAttribute("user", user);
+    public String showCompleteProfileForm(Model model) {
         model.addAttribute("currencies", Currency.values());
-
         return "profile/user_profile_form";
     }
 
     @PostMapping("/complete")
-    public String completeProfile(@ModelAttribute("user") User user) {
+    public String completeProfile(@ModelAttribute("currentUser") User user) {
 
         user.setProfileCompleted(true);
         userService.save(user);
