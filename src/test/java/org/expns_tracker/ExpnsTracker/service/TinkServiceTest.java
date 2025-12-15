@@ -174,7 +174,7 @@ class TinkServiceTest {
                 .addHeader("Content-Type", "application/json"));
 
         String validAccessToken = "valid-access-token-123";
-        JsonNode result = tinkService.fetchTransactions(validAccessToken);
+        JsonNode result = tinkService.fetchTransactions(validAccessToken, null);
 
         assertNotNull(result);
         assertEquals("t123", result.get("results").get(0).get("transactionId").asText());
@@ -192,7 +192,7 @@ class TinkServiceTest {
         mockWebServer.enqueue(new MockResponse().setResponseCode(401));
 
         assertThrows(Exception.class, () -> {
-            tinkService.fetchTransactions("expired-token");
+            tinkService.fetchTransactions("expired-token", null);
         });
     }
 

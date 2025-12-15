@@ -28,7 +28,7 @@ public class UserServiceTest {
     private TinkService tinkService;
 
     @Test
-    public void getTinkUserId_Success() throws ExecutionException, InterruptedException {
+    void getTinkUserId_Success() throws ExecutionException, InterruptedException {
         String userId = "valid-user-id";
         User mockUser = User.builder()
                 .id(userId)
@@ -44,7 +44,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void getTinkUserId_Success_Null() throws ExecutionException, InterruptedException {
+    void getTinkUserId_Success_Null() throws ExecutionException, InterruptedException {
         String userId = "valid-user-id";
         User mockUser = User.builder()
                 .id(userId)
@@ -60,7 +60,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void getTinkUserId_Failure_UserNotFound() throws ExecutionException, InterruptedException {
+    void getTinkUserId_Failure_UserNotFound() throws ExecutionException, InterruptedException {
         String userId = "invalid-user-id";
 
         when(userRepository.findById(userId)).thenReturn(null);
@@ -70,7 +70,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void setTinkUserId_Success() throws ExecutionException, InterruptedException {
+    void setTinkUserId_Success() throws ExecutionException, InterruptedException {
         String userId = "valid-user-id";
         String newTinkUserId = "new-tink-user-id";
 

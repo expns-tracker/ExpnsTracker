@@ -5,7 +5,6 @@ import org.expns_tracker.ExpnsTracker.entity.Transaction;
 import org.expns_tracker.ExpnsTracker.entity.User;
 import org.expns_tracker.ExpnsTracker.repository.TransactionRepository;
 import org.expns_tracker.ExpnsTracker.repository.UserRepository;
-
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -83,11 +82,8 @@ public class UserService {
 
         try {
             List<Transaction> transactions=transactionRepository.findByUserIdAndMonth(userId,year, month);
-            Double sum=transactions.stream().mapToDouble(Transaction::getAmount).sum();
-            return sum;
-        } catch (ExecutionException e) {
-            throw new RuntimeException(e);
-        } catch (InterruptedException e) {
+            return transactions.stream().mapToDouble(Transaction::getAmount).sum();
+        } catch (ExecutionException | InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
