@@ -51,7 +51,8 @@ public class TinkSchedulerTest {
     void setUp() throws ExecutionException, InterruptedException {
         User user1 = User.builder()
                 .id("user-id-1")
-                .name("Test User 1")
+                .firstName("Test")
+                .lastName("User 1")
                 .email("user1@email.com")
                 .tinkUserId("tink-user-id-1")
                 .build();
@@ -60,7 +61,8 @@ public class TinkSchedulerTest {
 
         User user2 = User.builder()
                 .id("user-id-2")
-                .name("Test User 2")
+                .firstName("Test")
+                .lastName("User 2")
                 .email("user2@email.com")
                 .tinkUserId("tink-user-id-2")
                 .build();

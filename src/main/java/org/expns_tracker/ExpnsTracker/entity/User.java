@@ -34,7 +34,7 @@ public class User extends Auditable{
     private String tinkUserId;
     private Boolean profileCompleted;
 
-    public String name() {
+    public String getName() {
         return firstName + " " + lastName;
     }
 }
