@@ -18,26 +18,44 @@ public class UserRepository {
 
     private final String COLLECTION_NAME = "users";
 
-    public User save(User user) throws ExecutionException, InterruptedException {
+    public User save(User user){
         DocumentReference docRef;
 
         if (user.getId() == null) {
             docRef = firestore.collection(COLLECTION_NAME).document();
             user.setId(docRef.getId());
-            docRef.set(user).get();
+            try {
+                docRef.set(user).get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
         } else {
             docRef = firestore.collection(COLLECTION_NAME).document(user.getId());
             user.setUpdatedAt(null);
-            docRef.set(user).get();
+            try {
+                docRef.set(user).get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
         }
 
-        DocumentSnapshot snapshot = docRef.get().get();
+        DocumentSnapshot snapshot = null;
+        try {
+            snapshot = docRef.get().get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
         return snapshot.toObject(User.class);
     }
 
-    public User findById(String id) throws ExecutionException, InterruptedException {
+    public User findById(String id) {
         DocumentReference docRef = firestore.collection(COLLECTION_NAME).document(id);
-        DocumentSnapshot snapshot = docRef.get().get();
+        DocumentSnapshot snapshot = null;
+        try {
+            snapshot = docRef.get().get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
         if (snapshot.exists()) {
             return snapshot.toObject(User.class);
         }

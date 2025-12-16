@@ -29,11 +29,7 @@ public class UserService {
         String tinkUserId = tinkService.createPermanentUser(userId);
         user.setTinkUserId(tinkUserId);
 
-        try {
-            userRepository.save(user);
-        } catch (ExecutionException | InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        userRepository.save(user);
 
         return tinkUserId;
 
@@ -42,21 +38,13 @@ public class UserService {
     public void setTinkUserId(String userId, String tinkUserId) {
         User user = getUser(userId);
         user.setTinkUserId(tinkUserId);
-        try {
-            userRepository.save(user);
-        } catch (ExecutionException | InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        userRepository.save(user);
     }
 
 
     public User getUser(String userId) {
         User user;
-        try {
-            user = userRepository.findById(userId);
-        } catch (ExecutionException | InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        user = userRepository.findById(userId);
         if (user == null) {
             throw new RuntimeException("User not found");
         }
@@ -64,13 +52,7 @@ public class UserService {
     }
 
     public void save(User user) {
-        try {
-            userRepository.save(user);
-        } catch (ExecutionException e) {
-            throw new RuntimeException(e);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        userRepository.save(user);
     }
 
     public Double getCurrentMonthExpenses(String userId) {

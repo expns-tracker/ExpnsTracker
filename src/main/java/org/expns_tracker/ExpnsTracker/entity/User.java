@@ -1,4 +1,5 @@
 package org.expns_tracker.ExpnsTracker.entity;
+import com.google.cloud.Timestamp;
 import com.google.cloud.firestore.annotation.DocumentId;
 import com.google.cloud.firestore.annotation.Exclude;
 import com.google.cloud.firestore.annotation.IgnoreExtraProperties;
@@ -36,6 +37,11 @@ public class User extends Auditable{
 
     private String tinkUserId;
     private Boolean profileCompleted;
+
+    private String syncStatus;
+    private String exportStatus;
+    private String lastExportContent;
+    private Timestamp lastExportTime;
 
     @Exclude
     public String getName() {

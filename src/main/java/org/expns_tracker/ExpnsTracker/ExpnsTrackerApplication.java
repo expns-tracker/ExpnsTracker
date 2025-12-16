@@ -1,5 +1,6 @@
 package org.expns_tracker.ExpnsTracker;
 
+import org.expns_tracker.ExpnsTracker.config.ApplicationProperties;
 import org.expns_tracker.ExpnsTracker.config.FirebaseProperties;
 import org.expns_tracker.ExpnsTracker.config.TinkProperties;
 import org.springframework.boot.SpringApplication;
@@ -9,7 +10,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-@EnableConfigurationProperties({FirebaseProperties.class, TinkProperties.class})
+@EnableConfigurationProperties({FirebaseProperties.class, TinkProperties.class, ApplicationProperties.class})
 @SpringBootApplication
 @EnableScheduling
 @EnableAsync
