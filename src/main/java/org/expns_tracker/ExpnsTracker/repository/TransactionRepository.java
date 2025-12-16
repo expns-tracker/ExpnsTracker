@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.api.core.ApiFuture;
+import com.google.cloud.Timestamp;
 import com.google.cloud.firestore.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -97,5 +98,15 @@ public class TransactionRepository {
             }
         }
 
+    }
+
+    public List<Transaction> findByUserIdAndDateBetween(String userId, Timestamp start, Timestamp end) throws ExecutionException, InterruptedException {
+        return firestore.collection("transactions")
+                .whereEqualTo("userId", userId)
+                .whereGreaterThanOrEqualTo("date", start)
+                .whereLessThan("date", end)
+                .get()
+                .get()
+                .toObjects(Transaction.class);
     }
 }

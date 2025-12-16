@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate Report</title>
+
+    <!-- Materialize CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+        main {
+            flex: 1 0 auto;
+        }
+        .input-field input[type=date]:focus + label {
+            color: #1976d2 !important;
+        }
+        .input-field input[type=date]:focus {
+            border-bottom: 1px solid #1976d2 !important;
+            box-shadow: 0 1px 0 0 #1976d2 !important;
+        }
+        .invalid-date {
+            border-bottom: 1px solid #F44336 !important;
+            box-shadow: 0 1px 0 0 #F44336 !important;
+        }
+    </style>
+</head>
+<body class="grey lighten-5">
+
+<nav class="blue darken-2 z-depth-2">
+    <div class="nav-wrapper container">
+        <a href="/" class="brand-logo"><i class="material-icons left">account_balance</i>ExpnsTracker</a>
+        <ul id="nav-mobile" class="right hide-on-med-and-down">
+            <li><a href="/"><i class="material-icons left">dashboard</i>Dashboard</a></li>
+            <li class="active"><a href="/reports"><i class="material-icons left">assignment</i>Reports</a></li>
+
+            <li th:if="${currentUser != null}">
+                <a href="/profile">
+                    <span th:text="${currentUser.firstName}">User</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<main>
+    <div class="container" style="margin-top: 40px;">
+        <div class="row">
+            <div class="col s12 m8 offset-m2 l6 offset-l3">
+
+                <div class="card hoverable">
+                    <div class="card-content">
+                            <span class="card-title center blue-text text-darken-2">
+                                <i class="material-icons medium" style="vertical-align: middle;">download</i><br>
+                                Export Transactions
+                            </span>
+                        <p class="center grey-text text-darken-1" style="margin-bottom: 30px;">
+                            Select a date range to generate a CSV report of your income and expenses.
+                        </p>
+
+                        <!-- Export Form -->
+                        <form id="reportForm" th:action="@{/reports/generate}" th:object="${reportRequest}" method="post">
+
+                            <div class="row">
+                                <div class="input-field col s12 m6">
+                                    <i class="material-icons prefix grey-text">date_range</i>
+                                    <input id="startDate" type="date" th:field="*{startDate}" required class="validate">
+                                    <label for="startDate" class="active">Start Date</label>
+                                    <span class="helper-text" data-error="Invalid date">From</span>
+                                </div>
+
+                                <div class="input-field col s12 m6">
+                                    <i class="material-icons prefix grey-text">event</i>
+                                    <input id="endDate" type="date" th:field="*{endDate}" required class="validate">
+                                    <label for="endDate" class="active">End Date</label>
+                                    <span class="helper-text" id="endDateHelper" data-error="Invalid date">To</span>
+                                </div>
+                            </div>
+
+                            <div class="card-action center-align" style="border-top: none; padding-top: 20px;">
+                                <!-- State: IDLE or FAILED or COMPLETED -->
+                                <button th:if="${currentUser != null and currentUser.exportStatus != 'RUNNING'}"
+                                        class="btn-large waves-effect waves-light blue darken-1 z-depth-1"
+                                        type="submit" name="action">
+                                    Generate CSV
+                                    <i class="material-icons right">file_download</i>
+                                </button>
+
+                                <!-- State: EXPORTING (Disabled) -->
+                                <button th:if="${currentUser != null and currentUser.exportStatus == 'RUNNING'}"
+                                        class="btn-large disabled">
+                                    Processing...
+                                    <i class="material-icons right">hourglass_empty</i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Download Section (Appears only when ready) -->
+                <div th:if="${currentUser != null and currentUser.lastExportTime != null}" class="center" style="margin-top: 20px;">
+                    <div class="card-panel green lighten-5 z-depth-1">
+                        <div class="row valign-wrapper" style="margin-bottom: 0;">
+                            <div class="col s2">
+                                <i class="material-icons circle green white-text">cloud_done</i>
+                            </div>
+                            <div class="col s10">
+                                    <span class="black-text">
+                                        Your last report from <span th:text="${currentUser.lastExportTime}">User</span> is ready!
+                                    </span>
+                                <br>
+                                <a href="/reports/download" class="btn-small waves-effect waves-light green darken-1" style="margin-top: 10px;">
+                                    Download Now
+                                    <i class="material-icons right">save_alt</i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer class="page-footer blue darken-2" style="padding-top: 0; margin-top: auto;">
+    <div class="footer-copyright">
+        <div class="container center">
+            © 2025 ExpnsTracker
+        </div>
+    </div>
+</footer>
+
+<!-- Materialize JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize Materialize components if needed (e.g., tooltips, selects)
+        var elems = document.querySelectorAll('.tooltipped');
+        var instances = M.Tooltip.init(elems);
+
+        // Date Validation Logic
+        const form = document.getElementById('reportForm');
+        const startDateInput = document.getElementById('startDate');
+        const endDateInput = document.getElementById('endDate');
+        const endDateHelper = document.getElementById('endDateHelper');
+
+        if (form && startDateInput && endDateInput) {
+            form.addEventListener('submit', function(event) {
+                const startDate = new Date(startDateInput.value);
+                const endDate = new Date(endDateInput.value);
+
+                // Reset previous validation state
+                endDateInput.classList.remove('invalid', 'invalid-date');
+                endDateHelper.setAttribute('data-error', 'Invalid date');
+
+                if (startDate && endDate && startDate > endDate) {
+                    event.preventDefault(); // Stop form submission
+
+                    // Apply invalid state
+                    endDateInput.classList.add('invalid', 'invalid-date');
+                    endDateHelper.setAttribute('data-error', 'End Date must be after Start Date');
+
+                    // Toast notification for better UX
+                    M.toast({html: 'End Date cannot be before Start Date', classes: 'red rounded'});
+                }
+            });
+
+            // Optional: Clear error when user changes date
+            endDateInput.addEventListener('change', function() {
+                if (this.classList.contains('invalid')) {
+                    const startDate = new Date(startDateInput.value);
+                    const endDate = new Date(this.value);
+                    if (startDate <= endDate) {
+                        this.classList.remove('invalid', 'invalid-date');
+                    }
+                }
+            });
+        }
+    });
+</script>
+<!-- Server-Side Notifications (Toasts) -->
+<script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', function () {
+        /*<![CDATA[*/
+        // Thymeleaf will inline the values here. If value is null, it stays null.
+        var successMessage = /*[[${successMessage}]]*/ null;
+        var errorMessage = /*[[${errorMessage}]]*/ null;
+        var infoMessage = /*[[${infoMessage}]]*/ null;
+
+        // Check and display toasts
+        if (successMessage) {
+            M.toast({
+                html: '<span><i class="material-icons left">check_circle</i>' + successMessage + '</span>',
+                classes: 'green darken-1 rounded',
+                displayLength: 4000
+            });
+        }
+
+        if (errorMessage) {
+            M.toast({
+                html: '<span><i class="material-icons left">error</i>' + errorMessage + '</span>',
+                classes: 'red darken-1 rounded',
+                displayLength: 5000
+            });
+        }
+
+        if (infoMessage) {
+            M.toast({
+                html: '<span><i class="material-icons left">info</i>' + infoMessage + '</span>',
+                classes: 'blue darken-1 rounded',
+                displayLength: 4000
+            });
+        }
+        /*]]>*/
+    });
+</script>
+</body>
+</html>

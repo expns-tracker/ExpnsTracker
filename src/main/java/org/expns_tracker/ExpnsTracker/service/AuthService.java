@@ -25,7 +25,7 @@ import java.util.concurrent.ExecutionException;
 public class AuthService {
     final UserRepository userRepository;
 
-    public void authenticateUser(String token, HttpSession session) throws FirebaseAuthException, ExecutionException, InterruptedException {
+    public void authenticateUser(String token, HttpSession session) throws FirebaseAuthException {
         FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(token);
 
         this.syncUser(decodedToken.getUid(), decodedToken.getEmail());
@@ -50,7 +50,7 @@ public class AuthService {
         );
     }
 
-    private void syncUser(String uid, String email) throws ExecutionException, InterruptedException {
+    private void syncUser(String uid, String email) {
 
         User user = userRepository.findById(uid);
 
