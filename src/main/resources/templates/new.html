@@ -18,9 +18,6 @@
             padding: 25px 30px;
             border-radius: 12px;
         }
-        .input-field i.material-icons {
-            cursor: pointer;
-        }
     </style>
 </head>
 
@@ -28,45 +25,43 @@
 
 <div class="card z-depth-3">
     <h4 class="center-align">Add Transaction</h4>
-    <br />
+    <br/>
 
-    <form onsubmit="saveTransaction(); return false;">
+    <form th:action="@{/transactions/new}"
+          th:object="${transaction}"
+          method="post">
 
-        <!-- Transaction Title -->
+        <!-- Transaction Type -->
         <div class="input-field">
-            <input id="title" type="text" required>
-            <label for="title">Title</label>
+            <select th:field="*{type}" required>
+                <option value="" disabled selected>Choose type</option>
+                <option th:each="type : ${types}"
+                        th:value="${type}"
+                        th:text="${type}">
+                </option>
+            </select>
+            <label>Transaction Type</label>
+        </div>
+
+        <!-- categoryId -->
+        <div class="input-field">
+            <input type="text" th:field="*{categoryId}" required>
+            <label>categoryId</label>
         </div>
 
         <!-- Amount -->
         <div class="input-field">
-            <input id="amount" type="number" step="0.01" required>
-            <label for="amount">Amount</label>
+            <input type="number" step="0.01" th:field="*{amount}" required>
+            <label>Amount</label>
+            <span class="red-text"
+                  th:if="${#fields.hasErrors('amount')}"
+                  th:errors="*{amount}"></span>
         </div>
 
-        <!-- Category Dropdown -->
+        <!-- Description -->
         <div class="input-field">
-            <select id="category" required>
-                <option value="" disabled selected>Choose category</option>
-                <option value="Food">Food</option>
-                <option value="Transport">Transport</option>
-                <option value="Shopping">Shopping</option>
-                <option value="Bills">Bills</option>
-                <option value="Other">Other</option>
-            </select>
-            <label>Category</label>
-        </div>
-
-        <!-- Date Picker -->
-        <div class="input-field">
-            <input type="text" id="date" class="datepicker" required>
-            <label for="date">Date</label>
-        </div>
-
-        <!-- Notes -->
-        <div class="input-field">
-            <textarea id="notes" class="materialize-textarea"></textarea>
-            <label for="notes">Notes (optional)</label>
+            <textarea th:field="*{description}" class="materialize-textarea"></textarea>
+            <label>Description (optional)</label>
         </div>
 
         <div class="center-align">
@@ -87,20 +82,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 
 <script>
-    // Initialize components
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         M.FormSelect.init(document.querySelectorAll('select'));
-        M.Datepicker.init(document.querySelectorAll('.datepicker'), {
-            format: 'yyyy-mm-dd',
-            defaultDate: new Date(),
-            setDefaultDate: true
-        });
     });
-
-    function saveTransaction() {
-        // Your JS save logic goes here
-        alert("Transaction saved!");
-    }
 </script>
 
 </body>
