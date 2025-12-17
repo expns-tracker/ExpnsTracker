@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+
+    <!-- Materialize CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <!-- Materialize JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+
+</head>
+<body>
+
+<!-- Sticky Navbar -->
+<div class="navbar-fixed">
+    <nav class="blue darken-2" th:fragment="navbar(activePage)">
+        <div class="nav-wrapper container">
+
+            <!-- Logo -->
+            <a th:href="@{/dashboard}" class="brand-logo">
+                <i class="material-icons">account_balance_wallet</i>ExpenseApp
+            </a>
+
+            <!-- Mobile Trigger -->
+            <a href="#" data-target="mobile-menu" class="sidenav-trigger">
+                <i class="material-icons">menu</i>
+            </a>
+
+            <!-- Desktop Menu -->
+            <ul class="right hide-on-med-and-down">
+
+                <li th:classappend="${activePage=='dashboard'} ? 'active'">
+                    <a th:href="@{/dashboard}">
+                        <i class="material-icons left">dashboard</i>Dashboard
+                    </a>
+                </li>
+
+                <li th:classappend="${activePage=='transactions'} ? 'active'">
+                    <a th:href="@{/transactions}">
+                        <i class="material-icons left">list</i>Transactions
+                    </a>
+                </li>
+
+                <li th:classappend="${activePage=='charts'} ? 'active'">
+                    <a th:href="@{/charts}">
+                        <i class="material-icons left">pie_chart</i>Charts
+                    </a>
+                </li>
+
+                <!-- ADMIN ONLY -->
+                <li
+                    th:classappend="${activePage=='admin'} ? 'active'">
+                    <a th:href="@{/admin}">
+                        <i class="material-icons left">security</i>Admin
+                    </a>
+                </li>
+
+                <!-- Dark Mode -->
+                <li>
+                    <a href="#" onclick="toggleDarkMode()">
+                        <i class="material-icons">dark_mode</i>
+                    </a>
+                </li>
+
+                <!-- Profile Dropdown -->
+                <li>
+                    <a class="dropdown-trigger" href="#" data-target="profile-dropdown">
+                        <i class="material-icons left">account_circle</i>
+                        <span sec:authentication="name">User</span>
+                        <i class="material-icons right">arrow_drop_down</i>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+</div>
+
+<!-- Profile Dropdown -->
+<ul id="profile-dropdown" class="dropdown-content">
+    <li><a th:href="@{/profile}"><i class="material-icons">person</i>Profile</a></li>
+    <li><a th:href="@{/settings}"><i class="material-icons">settings</i>Settings</a></li>
+    <li class="divider"></li>
+    <li>
+        <form th:action="@{/logout}" method="post">
+            <button class="btn-flat red-text" type="submit">
+                <i class="material-icons left">logout</i>Logout
+            </button>
+        </form>
+    </li>
+</ul>
+
+<!-- Mobile Menu -->
+<ul class="sidenav" id="mobile-menu">
+    <li><a th:href="@{/dashboard}">Dashboard</a></li>
+    <li><a th:href="@{/transactions}">Transactions</a></li>
+    <li><a th:href="@{/charts}">Charts</a></li>
+    <li>
+        <a th:href="@{/admin}">Admin</a>
+    </li>
+    <li><a href="#" onclick="toggleDarkMode()">Dark Mode</a></li>
+</ul>
+
+<!-- JS -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function () {
+            M.AutoInit();
+        });
+        M.Sidenav.init(document.querySelectorAll('.sidenav'));
+        M.Dropdown.init(document.querySelectorAll('.dropdown-trigger'), {
+            coverTrigger: true
+        });
+
+        // Load Dark Mode
+        if (localStorage.getItem("darkMode") === "true") {
+            document.body.classList.add("dark-mode");
+        }
+    });
+
+    function toggleDarkMode() {
+        document.body.classList.toggle("dark-mode");
+        localStorage.setItem("darkMode",
+            document.body.classList.contains("dark-mode"));
+    }
+</script>
+
+<style>
+    /* Active menu */
+    nav ul li.active {
+        background-color: rgba(255,255,255,0.15);
+        border-radius: 4px;
+    }
+
+    /* Dark Mode */
+    .dark-mode {
+        background-color: #121212;
+        color: #e0e0e0;
+    }
+
+    .dark-mode .chart-box,
+    .dark-mode nav {
+        background-color: #1e1e1e !important;
+    }
+
+    .dark-mode a {
+        color: #90caf9 !important;
+    }
+</style>
+
+</body>
+</html>

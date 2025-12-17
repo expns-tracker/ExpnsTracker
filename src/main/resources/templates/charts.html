@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Expense Charts</title>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Materialize CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
+          rel="stylesheet">
+
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+          rel="stylesheet">
+
+    <!-- Materialize JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+        }
+
+        .chart-box {
+            background: white;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            max-width: 450px;   /* smaller width */
+        }
+
+        h2 {
+            margin-bottom: 5px;
+            font-size: 18px;
+        }
+
+        canvas {
+            width: 100% !important;
+            height: 220px !important;  /* smaller height */
+        }
+    </style>
+</head>
+<body>
+<div th:replace="navbar :: navbar('charts')"></div>
+
+<h1 style="font-size:22px; margin-bottom:20px;margin-left: 20px">Expense Visualization</h1>
+
+<div style="display:flex; flex-wrap:wrap; gap:20px; padding: 20px">
+    <div class="chart-box">
+        <h2>Category Breakdown</h2>
+        <canvas id="pieChart"></canvas>
+    </div>
+
+    <div class="chart-box">
+        <h2>Expense Only (Donut)</h2>
+        <canvas id="doughnutChart"></canvas>
+    </div>
+
+    <div class="chart-box">
+        <h2>Daily Totals</h2>
+        <canvas id="barChart"></canvas>
+    </div>
+
+    <div class="chart-box">
+        <h2>Trend Over Time</h2>
+        <canvas id="lineChart"></canvas>
+    </div>
+</div>
+
+<script>
+
+    const transactions = [
+        { text: "Salary", amount: 2500, category: "Income", date: "2025-11-01" },
+        { text: "Groceries", amount: -120, category: "Food", date: "2025-11-02" },
+        { text: "Electricity", amount: -60, category: "Utilities", date: "2025-11-03" },
+        { text: "Coffee", amount: -6.5, category: "Food", date: "2025-11-03" },
+        { text: "Gym", amount: -30, category: "Health", date: "2025-11-04" },
+        { text: "Freelance", amount: 600, category: "Income", date: "2025-11-05" },
+        { text: "Rent", amount: -800, category: "Housing", date: "2025-11-01" },
+        { text: "Internet", amount: -25, category: "Utilities", date: "2025-11-06" },
+        { text: "Restaurant", amount: -45.2, category: "Food", date: "2025-11-07" },
+        { text: "Movie", amount: -12, category: "Entertainment", date: "2025-11-08" }
+    ];
+
+    // --- Aggregation ---
+    const categoryTotals = {};
+    const expenseTotals = {};
+    const dailyTotals = {};
+
+    transactions.forEach(t => {
+        categoryTotals[t.category] = (categoryTotals[t.category] || 0) + t.amount;
+        if (t.amount < 0)
+            expenseTotals[t.category] = (expenseTotals[t.category] || 0) + Math.abs(t.amount);
+        dailyTotals[t.date] = (dailyTotals[t.date] || 0) + t.amount;
+    });
+
+    const pieLabels = Object.keys(categoryTotals);
+    const pieValues = Object.values(categoryTotals).map(v => Math.abs(v));
+
+    const doughnutLabels = Object.keys(expenseTotals);
+    const doughnutValues = Object.values(expenseTotals);
+
+    const barLabels = Object.keys(dailyTotals);
+    const barValues = Object.values(dailyTotals);
+
+    // --- PIE ---
+    new Chart(document.getElementById("pieChart"), {
+        type: "pie",
+        data: {
+            labels: pieLabels,
+            datasets: [{
+                data: pieValues,
+                backgroundColor: ["#2ecc71", "#e74c3c", "#f1c40f", "#3498db", "#9b59b6", "#e67e22"]
+            }]
+        }
+    });
+
+    // --- DOUGHNUT ---
+    new Chart(document.getElementById("doughnutChart"), {
+        type: "doughnut",
+        data: {
+            labels: doughnutLabels,
+            datasets: [{
+                data: doughnutValues,
+                backgroundColor: ["#e74c3c", "#c0392b", "#d35400", "#e67e22", "#f39c12"]
+            }]
+        }
+    });
+
+    // --- BAR ---
+    new Chart(document.getElementById("barChart"), {
+        type: "bar",
+        data: {
+            labels: barLabels,
+            datasets: [{
+                label: "€",
+                data: barValues,
+                backgroundColor: "#3498db"
+            }]
+        }
+    });
+
+    // --- LINE ---
+    new Chart(document.getElementById("lineChart"), {
+        type: "line",
+        data: {
+            labels: barLabels,
+            datasets: [{
+                label: "€",
+                data: barValues,
+                borderColor: "#9b59b6",
+                tension: 0.3
+            }]
+        }
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        M.Sidenav.init(document.querySelectorAll('.sidenav'));
+        M.Dropdown.init(document.querySelectorAll('.dropdown-trigger'), {
+            coverTrigger: true
+        });
+
+        // Load Dark Mode
+        if (localStorage.getItem("darkMode") === "true") {
+            document.body.classList.add("dark-mode");
+        }
+    });
+
+    function toggleDarkMode() {
+        document.body.classList.toggle("dark-mode");
+        localStorage.setItem("darkMode",
+            document.body.classList.contains("dark-mode"));
+    }
+</script>
+
+<style>
+    /* Active menu */
+    nav ul li.active {
+        background-color: rgba(255,255,255,0.15);
+        border-radius: 4px;
+    }
+
+    /* Dark Mode */
+    .dark-mode {
+        background-color: #121212;
+        color: #e0e0e0;
+    }
+
+    .dark-mode .chart-box,
+    .dark-mode nav {
+        background-color: #1e1e1e !important;
+    }
+
+    .dark-mode a {
+        color: #90caf9 !important;
+    }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+
+</body>
+</html>

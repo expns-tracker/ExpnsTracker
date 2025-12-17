@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Profile | ExpnsTracker</title>
+
+    <!-- Materialize CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <style>
+        body {
+            background: #f4f4f4;
+            padding: 2rem;
+        }
+
+        .card {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 25px 30px;
+            border-radius: 12px;
+        }
+
+        .profile-picture {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .profile-picture img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+        }
+
+        .input-field i.material-icons {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card z-depth-3">
+    <h4 class="center-align">My Profile</h4>
+    <br />
+
+    <div class="profile-picture">
+        <img src="https://via.placeholder.com/100" alt="Profile Picture">
+    </div>
+
+    <form onsubmit="saveProfile(); return false;">
+
+        <!-- Name -->
+        <div class="input-field">
+            <input id="name" type="text" value="John Doe" required>
+            <label for="name" class="active">Full Name</label>
+        </div>
+
+        <!-- Email -->
+        <div class="input-field">
+            <input id="email" type="email" value="john@example.com" required>
+            <label for="email" class="active">Email</label>
+        </div>
+
+        <!-- Password Change -->
+        <div class="input-field">
+            <input id="password" type="password">
+            <label for="password">New Password</label>
+            <i class="material-icons toggle-password" onclick="togglePassword('password', this)">visibility</i>
+        </div>
+
+        <div class="input-field">
+            <input id="confirm-password" type="password">
+            <label for="confirm-password">Confirm Password</label>
+            <i class="material-icons toggle-password" onclick="togglePassword('confirm-password', this)">visibility</i>
+        </div>
+
+        <div class="center-align">
+            <button class="btn waves-effect waves-light" type="submit">
+                Save Profile
+            </button>
+        </div>
+
+        <br>
+        <p class="center-align">
+            <a th:href="@{/dashboard}">Back to Dashboard</a>
+        </p>
+
+    </form>
+</div>
+
+<!-- Materialize JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+<script>
+    function saveProfile() {
+        alert("Profile saved!");
+    }
+
+    function togglePassword(id, icon) {
+        const input = document.getElementById(id);
+        if (input.type === "password") {
+            input.type = "text";
+            icon.textContent = "visibility_off";
+        } else {
+            input.type = "password";
+            icon.textContent = "visibility";
+        }
+    }
+</script>
+
+</body>
+</html>

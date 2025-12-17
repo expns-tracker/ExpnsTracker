@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Dashboard | ExpnsTracker</title>
+    <!-- Materialize CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        body {
+            background: #f4f6f8;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 25px 15px;
+            border-radius: 12px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .feature-box {
+            background: #fff;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        table.striped {
+            background: #fff;
+            margin-top: 20px;
+        }
+
+        .centered-title {
+            text-align: center;
+            margin-top: 40px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div th:replace="navbar :: navbar('dashboard')"></div>
+
+<!-- 2x2 Grid Dashboard -->
+<div class="container" style="margin-top:40px;">
+<div class="row">
+    <div class="col s12 m6">
+        <div class="card stat-card red lighten-4">
+            <span>Current Balance</span>
+            <div class="stat-value">€2,450</div>
+        </div>
+    </div>
+    <div class="col s12 m6">
+        <div class="card stat-card green lighten-4">
+            <span>Total Income</span>
+            <div class="stat-value">€5,200</div>
+        </div>
+    </div>
+    <div class="col s12 m6">
+        <div class="card stat-card orange lighten-4">
+            <span>Total Expenses</span>
+            <div class="stat-value">€2,750</div>
+        </div>
+    </div>
+    <div class="col s12 m6">
+        <div class="card stat-card blue lighten-4">
+            <span>Upcoming Bills</span>
+            <div class="stat-value">3</div>
+        </div>
+    </div>
+</div>
+
+<!-- Additional Features -->
+<div class="row">
+    <div class="col s12 m4">
+        <div class="feature-box">
+            <i class="material-icons large red-text">notification_important</i>
+            <p>Alerts: 2 new notifications</p>
+        </div>
+    </div>
+    <div class="col s12 m4">
+        <div class="feature-box">
+            <i class="material-icons large green-text">support_agent</i>
+            <p>Help Requests: 3 pending</p>
+        </div>
+    </div>
+    <div class="col s12 m4">
+        <div class="feature-box">
+            <i class="material-icons large blue-text">check_circle</i>
+            <p>Bugs/Cases Solved: 5</p>
+        </div>
+    </div>
+</div>
+
+<!-- Latest Transactions -->
+<h5 class="centered-title">Latest Transactions</h5>
+<div class="row">
+    <div class="col s12 m8 offset-m2">
+        <table class="striped responsive-table">
+            <thead>
+            <tr>
+                <th>Text</th>
+                <th>Amount</th>
+                <th>Category</th>
+                <th>Date</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>Salary</td>
+                <td class="green-text">+€2,500</td>
+                <td>Income</td>
+                <td>2025-12-01</td>
+            </tr>
+            <tr>
+                <td>Groceries</td>
+                <td class="red-text">-€120</td>
+                <td>Food</td>
+                <td>2025-12-02</td>
+            </tr>
+            <tr>
+                <td>Electricity</td>
+                <td class="red-text">-€60</td>
+                <td>Utilities</td>
+                <td>2025-12-03</td>
+            </tr>
+            <tr>
+                <td>Coffee</td>
+                <td class="red-text">-€6.5</td>
+                <td>Food</td>
+                <td>2025-12-03</td>
+            </tr>
+            <tr>
+                <td>Gym</td>
+                <td class="red-text">-€30</td>
+                <td>Health</td>
+                <td>2025-12-04</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div></div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Load Dark Mode
+        if (localStorage.getItem("darkMode") === "true") {
+            document.body.classList.add("dark-mode");
+        }
+    });
+
+    function toggleDarkMode() {
+        document.body.classList.toggle("dark-mode");
+        localStorage.setItem("darkMode",
+            document.body.classList.contains("dark-mode"));
+    }
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        const sidenavs = document.querySelectorAll('.sidenav');
+        if (sidenavs.length) {
+            M.Sidenav.init(sidenavs);
+        }
+
+        const dropdowns = document.querySelectorAll('.dropdown-trigger');
+        if (dropdowns.length) {
+            M.Dropdown.init(dropdowns, {
+                coverTrigger: false,
+                constrainWidth: false
+            });
+        }
+
+        if (localStorage.getItem("darkMode") === "true") {
+            document.body.classList.add("dark-mode");
+        }
+    });
+</script>
+
+<style>
+    /* Active menu */
+    nav ul li.active {
+        background-color: rgba(255,255,255,0.15);
+        border-radius: 4px;
+    }
+
+    /* Dark Mode */
+    .dark-mode {
+        background-color: #121212;
+        color: #e0e0e0;
+    }
+
+    .dark-mode .chart-box,
+    .dark-mode nav {
+        background-color: #1e1e1e !important;
+    }
+
+    .dark-mode a {
+        color: #90caf9 !important;
+    }
+</style>
+
+<!-- Materialize JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+</body>
+</html>

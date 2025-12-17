@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Import Transactions | ExpnsTracker</title>
+
+    <!-- Materialize CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <style>
+        body {
+            background: #f4f4f4;
+            padding: 2rem;
+        }
+
+        .card {
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .input-field {
+            margin-bottom: 20px;
+        }
+
+        table {
+            background: #fff;
+            border-radius: 8px;
+        }
+
+        table th, table td {
+            padding: 12px 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="card z-depth-3">
+        <h4 class="center-align">Import Transactions</h4>
+        <p class="center-align">Upload a PDF or CSV file to import your transactions.</p>
+        <br />
+
+        <form id="importForm" onsubmit="importTransactions(); return false;">
+            <div class="file-field input-field">
+                <div class="btn blue darken-2">
+                    <span>Upload File</span>
+                    <input type="file" id="transactionFile" accept=".pdf,.csv">
+                </div>
+                <div class="file-path-wrapper">
+                    <input class="file-path validate" type="text" placeholder="Select your file">
+                </div>
+            </div>
+
+            <div class="center-align">
+                <button class="btn waves-effect waves-light blue darken-2" type="submit">
+                    Import Transactions
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <br />
+
+    <!-- Transactions Table -->
+    <div class="card z-depth-3">
+        <div class="card-content">
+            <span class="card-title">Imported Transactions</span>
+            <table class="highlight responsive-table" id="transactionsTable">
+                <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Amount (€)</th>
+                    <th>Category</th>
+                    <th>Date</th>
+                </tr>
+                </thead>
+                <tbody>
+                <!-- Transactions will be added here dynamically -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <p class="center-align" style="margin-top: 20px;">
+        <a th:href="@{/dashboard}">Back to Dashboard</a>
+    </p>
+
+</div>
+
+<!-- Materialize JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+<script>
+    function importTransactions() {
+        const fileInput = document.getElementById('transactionFile');
+        const file = fileInput.files[0];
+
+        if (!file) {
+            alert("Please select a file to import.");
+            return;
+        }
+
+        // Dummy example: parse file and populate table
+        // Real implementation would require backend processing or a PDF/CSV parser
+        const transactions = [
+            { title: "Salary", amount: 2500, category: "Income", date: "2025-12-01" },
+            { title: "Groceries", amount: -120, category: "Food", date: "2025-12-02" },
+            { title: "Electricity", amount: -60, category: "Utilities", date: "2025-12-03" }
+        ];
+
+        const tbody = document.querySelector('#transactionsTable tbody');
+        tbody.innerHTML = ''; // Clear previous entries
+
+        transactions.forEach(tx => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${tx.title}</td>
+                <td class="${tx.amount >= 0 ? 'green-text' : 'red-text'}">${tx.amount >= 0 ? '+' : ''}${tx.amount}</td>
+                <td>${tx.category}</td>
+                <td>${tx.date}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        alert("Transactions imported successfully (dummy data).");
+    }
+</script>
+
+</body>
+</html>
