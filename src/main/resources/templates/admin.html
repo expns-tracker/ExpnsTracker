@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Materialize CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            background: #fce4ec; /* light red background */
+        }
+
+        /* DARK MODE */
+        body.dark-mode {
+            background: #121212;
+            color: #e0e0e0;
+        }
+        body.dark-mode .card, body.dark-mode .chart-box {
+            background: #1e1e1e !important;
+            color: #e0e0e0;
+        }
+        body.dark-mode nav {
+            background-color: #b71c1c !important; /* dark red navbar */
+        }
+        body.dark-mode a {
+            color: #f48fb1 !important;
+        }
+
+        nav .brand-logo {
+            font-size: 1.6rem;
+        }
+
+        .stat-card {
+            border-radius: 12px;
+        }
+        .stat-value {
+            font-size: 26px;
+            font-weight: 600;
+        }
+
+        .chart-box {
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        /* RED THEME */
+        nav {
+            background-color: #e53935 !important;
+        }
+        .stat-card.blue { background-color: #ef9a9a !important; } /* Active Accounts */
+        .stat-card.green { background-color: #ff8a65 !important; } /* Deactivated Accounts */
+        .stat-card.orange { background-color: #ff7043 !important; } /* Feedback Responses */
+        .stat-card.red { background-color: #d32f2f !important; } /* Help Cases Solved */
+
+        /* Toggle button */
+        .dark-mode-btn {
+            cursor: pointer;
+        }
+
+        /* Notification badge */
+        .notification-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #ff1744;
+            color: white;
+            font-size: 10px;
+            padding: 2px 5px;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar-fixed">
+    <nav>
+        <div class="nav-wrapper container">
+            <a href="#" class="brand-logo">
+                <i class="material-icons">admin_panel_settings</i>Admin
+            </a>
+
+            <ul class="right">
+                <!-- Return to Main Platform -->
+                <li>
+                    <a href="/dashboard" class="btn red lighten-2" style="margin-right:10px;">
+                        <i class="material-icons left">home</i>Main Platform
+                    </a>
+                </li>
+
+                <!-- Notifications -->
+                <li style="position:relative;">
+                    <a class="dropdown-trigger" href="#" data-target="notifications-dropdown">
+                        <i class="material-icons">notifications</i>
+                    </a>
+                </li>
+
+                <!-- Dark Mode Toggle -->
+                <li>
+                    <a href="#" onclick="toggleDarkMode()" class="dark-mode-btn">
+                        <i class="material-icons">dark_mode</i>
+                    </a>
+                </li>
+
+                <!-- Profile Dropdown -->
+                <li>
+                    <a class="dropdown-trigger" href="#" data-target="admin-dropdown">
+                        <i class="material-icons">account_circle</i>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+</div>
+
+<!-- Profile Dropdown -->
+<ul id="admin-dropdown" class="dropdown-content">
+    <li><a href="/profile"><i class="material-icons">person</i>Profile</a></li>
+    <li><a href="/settings"><i class="material-icons">settings</i>Settings</a></li>
+    <li class="divider"></li>
+    <li>
+        <form th:action="@{/logout}" method="post">
+            <button class="btn-flat red-text" type="submit">
+                <i class="material-icons left">logout</i>Logout
+            </button>
+        </form>
+    </li>
+</ul>
+
+<!-- Notifications Dropdown -->
+<ul id="notifications-dropdown" class="dropdown-content">
+    <li><a href="#"><i class="material-icons">person_add</i>New account activation request</a></li>
+    <li><a href="#"><i class="material-icons">feedback</i>New feedback comment</a></li>
+    <li><a href="#"><i class="material-icons">bug_report</i>New bug/case reported</a></li>
+</ul>
+
+<!-- CONTENT -->
+<div class="container" style="margin-top:40px;">
+
+    <!-- STATS -->
+    <div class="row">
+        <div class="col s12 m6 l3">
+            <div class="card stat-card blue">
+                <div class="card-content">
+                    <span class="card-title">Active Accounts</span>
+                    <div class="stat-value">1,248</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col s12 m6 l3">
+            <div class="card stat-card green">
+                <div class="card-content">
+                    <span class="card-title">Deactivated Accounts</span>
+                    <div class="stat-value">234</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col s12 m6 l3">
+            <div class="card stat-card orange">
+                <div class="card-content">
+                    <span class="card-title">Feedback Responses</span>
+                    <div class="stat-value">512</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col s12 m6 l3">
+            <div class="card stat-card red">
+                <div class="card-content">
+                    <span class="card-title">Help Cases Solved</span>
+                    <div class="stat-value">128</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CHARTS -->
+    <div class="row">
+        <div class="col s12 l6">
+            <div class="chart-box">
+                <h6>Account Activation Trends</h6>
+                <canvas id="activationChart"></canvas>
+            </div>
+        </div>
+
+        <div class="col s12 l6">
+            <div class="chart-box">
+                <h6>Feedback Responses Over Time</h6>
+                <canvas id="feedbackChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN TASKS TABLE -->
+    <div class="row">
+        <div class="col s12">
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">Admin Actions</span>
+                    <table class="highlight responsive-table">
+                        <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Action</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>john@example.com</td>
+                            <td>Activated Account</td>
+                            <td class="green-text">Completed</td>
+                            <td>2025-11-01</td>
+                        </tr>
+                        <tr>
+                            <td>anna@example.com</td>
+                            <td>Deactivated Account</td>
+                            <td class="red-text">Pending</td>
+                            <td>2025-11-02</td>
+                        </tr>
+                        <tr>
+                            <td>mark@example.com</td>
+                            <td>Responded to Feedback</td>
+                            <td class="green-text">Completed</td>
+                            <td>2025-11-03</td>
+                        </tr>
+                        <tr>
+                            <td>lisa@example.com</td>
+                            <td>Resolved Help Request</td>
+                            <td class="green-text">Completed</td>
+                            <td>2025-11-04</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        // Initialize dropdowns
+        M.Dropdown.init(document.querySelectorAll('.dropdown-trigger'), {
+            coverTrigger: false,
+            constrainWidth: false
+        });
+
+        // Account Activation Chart
+        new Chart(document.getElementById('activationChart'), {
+            type: 'line',
+            data: {
+                labels: ['Jan','Feb','Mar','Apr','May','Jun'],
+                datasets: [{
+                    label: 'Accounts Activated',
+                    data: [120, 180, 260, 320, 400, 480],
+                    borderColor: '#d32f2f',
+                    tension: 0.3
+                }]
+            }
+        });
+
+        // Feedback Responses Chart
+        new Chart(document.getElementById('feedbackChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Jan','Feb','Mar','Apr','May','Jun'],
+                datasets: [{
+                    label: 'Feedback Responded',
+                    data: [30, 45, 60, 70, 90, 120],
+                    backgroundColor: '#b71c1c'
+                }]
+            }
+        });
+
+        // Load dark mode
+        if (localStorage.getItem("darkMode") === "true") {
+            document.body.classList.add("dark-mode");
+        }
+    });
+
+    // Dark mode toggle function
+    function toggleDarkMode() {
+        document.body.classList.toggle("dark-mode");
+        localStorage.setItem("darkMode",
+            document.body.classList.contains("dark-mode"));
+    }
+</script>
+
+</body>
+</html>

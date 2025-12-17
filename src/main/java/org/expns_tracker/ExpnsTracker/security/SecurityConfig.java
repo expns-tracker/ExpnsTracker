@@ -22,8 +22,16 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/login",
                                 "/register",
-                                "/error",
-                                "/error/**",
+                                "/transactions",
+                                "/new",
+                                "/nav",
+                                "/charts",
+                                "/admin",
+                                "/profile",
+                                "/import",
+                                "/dashboard",
+                                "/settings",
+                                "/api/auth/session-login",
                                 "/css/**",
                                 "/js/**",
                                 "/favicon.ico").permitAll()
