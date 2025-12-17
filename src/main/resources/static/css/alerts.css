@@ -1,0 +1,24 @@
+
+.alert-panel {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    transition: opacity 1s ease-out;
+}
+.alert-content {
+    display: flex;
+    align-items: center;
+}
+.alert-icon {
+    margin-right: 10px;
+}
+.close-alert {
+    cursor: pointer;
+    opacity: 0.6;
+}
+.close-alert:hover {
+    opacity: 1;
+}

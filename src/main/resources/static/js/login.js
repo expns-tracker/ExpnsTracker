@@ -1,5 +1,5 @@
 import {app} from "/js/firebase/firebase-config.js";
-import {getAuth, createUserWithEmailAndPassword, GoogleAuthProvider ,
+import {getAuth, signInWithEmailAndPassword, GoogleAuthProvider ,
     signInWithPopup } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
 
 const auth = getAuth(app);
@@ -32,26 +32,13 @@ function formatFirebaseError(error) {
 }
 
 window.togglePassword = togglePassword;
-window.signup = function (event) {
+window.signin = function (event) {
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
-    const confirmPasswordInput = document.getElementById("confirm-password");
-    const confirmPassword = confirmPasswordInput.value;
-
     const errorDiv = document.getElementById('error-message');
-    const confirmError = document.getElementById("confirm-error");
 
-    confirmPasswordInput.classList.remove('invalid');
 
-    if(password !== confirmPassword){
-        confirmPasswordInput.classList.add('invalid');
-        confirmError.setAttribute('data-error', 'Passwords do not match');
-        return;
-    } else {
-        errorDiv.style.display = 'none';
-    }
-
-    createUserWithEmailAndPassword(auth, email, password)
+    signInWithEmailAndPassword(auth, email, password)
         .then(async (userCredential) => {
             // user created successfully
             const idToken = await userCredential.user.getIdToken();

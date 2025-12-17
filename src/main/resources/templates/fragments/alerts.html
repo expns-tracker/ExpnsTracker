@@ -1,0 +1,27 @@
+<div th:fragment="alert-section">
+
+    <div th:if="${successMessage}" class="alert-panel green lighten-4 green-text text-darken-4 z-depth-1">
+        <div class="alert-content">
+            <i class="material-icons alert-icon">check_circle</i>
+            <strong th:text="${successMessage}"></strong>
+        </div>
+        <i class="material-icons close-alert">close</i>
+    </div>
+
+    <div th:if="${errorMessage}" class="alert-panel red lighten-4 red-text text-darken-4 z-depth-1">
+        <div class="alert-content">
+            <i class="material-icons alert-icon">error</i>
+            <strong th:text="${errorMessage}"></strong>
+        </div>
+        <i class="material-icons close-alert">close</i>
+    </div>
+
+    <div th:if="${infoMessage}" class="alert-panel blue lighten-4 blue-text text-darken-4 z-depth-1">
+        <div class="alert-content">
+            <i class="material-icons alert-icon">info</i>
+            <span th:text="${infoMessage}"></span>
+        </div>
+        <i class="material-icons close-alert">close</i>
+    </div>
+
+</div>
