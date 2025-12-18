@@ -47,9 +47,15 @@
                 Connect Bank Account
             </a>
 
-            <a th:href="@{/tink/load-transactions}" class="btn-large waves-effect waves-light green">
+            <a th:if="${currentUser != null and currentUser.syncStatus != 'RUNNING'}" th:href="@{/tink/load-transactions}" class="btn-large waves-effect waves-light green">
                 <i class="material-icons left">update</i>
                 Load Transactions
+            </a>
+
+            <a th:if="${currentUser != null and currentUser.syncStatus == 'RUNNING'}"
+                    class="btn-large disabled">
+                Sync in progress...
+                <i class="material-icons right">hourglass_empty</i>
             </a>
 
 

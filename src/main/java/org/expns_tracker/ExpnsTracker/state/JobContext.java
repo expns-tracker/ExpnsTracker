@@ -2,7 +2,6 @@ package org.expns_tracker.ExpnsTracker.state;
 
 import lombok.Getter;
 import org.expns_tracker.ExpnsTracker.entity.User;
-import org.expns_tracker.ExpnsTracker.repository.UserRepository;
 import org.expns_tracker.ExpnsTracker.service.UserService;
 import org.expns_tracker.ExpnsTracker.state.enums.JobType;
 

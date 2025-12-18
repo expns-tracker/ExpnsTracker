@@ -1,6 +1,7 @@
 package org.expns_tracker.ExpnsTracker.scheduler;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.cloud.Timestamp;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -13,6 +14,8 @@ import org.expns_tracker.ExpnsTracker.repository.UserRepository;
 import org.expns_tracker.ExpnsTracker.service.TinkService;
 import org.expns_tracker.ExpnsTracker.service.TransactionService;
 import org.expns_tracker.ExpnsTracker.service.UserService;
+import org.expns_tracker.ExpnsTracker.state.JobContext;
+import org.expns_tracker.ExpnsTracker.state.enums.JobType;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -46,18 +49,38 @@ public class TinkScheduler {
         }
         try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
             for (User user : users) {
-                executor.submit(() -> {
+                LockConfiguration lockConfig = getUserLockConfig(user);
+                Optional<SimpleLock> lock = lockProvider.lock(lockConfig);
+
+                if (lock.isEmpty()) {
+                    log.info("Sync already in progress for this user: {}.", user.getEmail());
+                    continue;
+                }
+
+                try{
+                    JobContext  context = new JobContext(user, userService, JobType.SYNC);
                     try {
-                        syncUserSafely(user);
-                    } catch (Exception e) {
-                        log.error(
-                                "Failed while syncing transactions for user {}:{}.",
-                                user.getEmail(),
-                                user.getName(),
-                                e
-                        );
+                        context.requestStart(() -> {
+                            executor.submit(() -> {
+                                try {
+                                    syncUserTransactions(user, context);
+                                } catch (Exception e) {
+                                    context.signalFailure(
+                                            "Failed while syncing transactions for user " +
+                                                    user.getEmail() + ": " +
+                                                    user.getName() + " " +
+                                                    e.getMessage()
+                                    );
+                                }
+                            });
+                        });
+                    } catch (IllegalStateException e) {
+                        log.info("Sync already in progress for this user: {}.", user.getEmail());
                     }
-                });
+                } finally {
+                    lock.get().unlock();
+                }
+
             }
         }
 
@@ -72,36 +95,28 @@ public class TinkScheduler {
         Optional<SimpleLock> lock = lockProvider.lock(lockConfig);
 
         if (lock.isEmpty()) {
-            throw new IllegalStateException("Sync already in progress for this user.");
+            throw new IllegalStateException("Sync already in progress for this user: " + user.getEmail());
         }
 
-        Thread.ofVirtual().start(() -> {
-            try {
-                syncUserTransactions(user);
-            } catch (Exception e) {
-                log.error("Manual sync failed for user {}: {}", user.getEmail(), e.getMessage());
-            } finally {
-                lock.get().unlock();
-            }
-        });
-    }
-
-    private void syncUserSafely(User user) {
-        LockConfiguration lockConfig = getUserLockConfig(user);
-        Optional<SimpleLock> lock = lockProvider.lock(lockConfig);
-
-        if (lock.isPresent()) {
-            try {
-                syncUserTransactions(user);
-            } finally {
-                lock.get().unlock();
-            }
-        } else {
-            log.info("Skipping user {} - already being synced.", user.getEmail());
+        try{
+            JobContext  context = new JobContext(user, userService, JobType.SYNC);
+            context.requestStart(() -> {
+                Thread.ofVirtual().start(() -> {
+                    try {
+                        syncUserTransactions(user, context);
+                    } catch (Exception e) {
+                        context.signalFailure("Manual sync failed for user " + user.getEmail() + ": " + e.getMessage());
+                    }
+                });
+            });
+        } finally {
+            lock.get().unlock();
         }
+
+
     }
 
-    private void syncUserTransactions(@NotNull User user) {
+    private void syncUserTransactions(@NotNull User user, JobContext context) {
         log.info("Syncing transactions for user {}:{}", user.getEmail(), user.getName());
 
         String code = tinkService.getUserAccessCode(user.getTinkUserId());
@@ -122,6 +137,8 @@ public class TinkScheduler {
             pageToken = transactions.get("nextPageToken").asText();
             pageToken = pageToken.isEmpty() ? null :  pageToken;
         } while (pageToken != null);
+
+        context.signalSuccess();
 
     }
 
