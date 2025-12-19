@@ -8,7 +8,7 @@ import org.expns_tracker.ExpnsTracker.state.JobState;
 public class IdleState implements JobState {
     @Override
     public void start(JobContext context, Runnable taskToRun) {
-        log.info("Starting {} job for user {}", context.getJobType(), context.getUser().getId());
+        log.info("Starting {} job for user {}", context.getJobType(), context.getUserId());
         taskToRun.run();
         context.setState(new RunningState());
     }
