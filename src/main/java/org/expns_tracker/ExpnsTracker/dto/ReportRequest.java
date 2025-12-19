@@ -1,4 +1,4 @@
-package org.expns_tracker.ExpnsTracker.Dto;
+package org.expns_tracker.ExpnsTracker.dto;
 
 import lombok.Data;
 

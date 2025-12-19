@@ -94,7 +94,7 @@ public class CsvExportService {
                 log.info("Saved CSV to local disk: {}", filePath.toAbsolutePath());
 
 
-                User user = context.getUser();
+                User user = userService.getUser(userId);
                 user.setLastExportContent(filePath.toString());
                 user.setLastExportTime(Timestamp.now());
                 userService.save(user);
