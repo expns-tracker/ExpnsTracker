@@ -38,29 +38,55 @@
     </div>
 
     <h3>History</h3>
-    <ul id="list" class="list">
-    </ul>
 
+    <table class="striped responsive-table">
+        <thead>
+        <tr>
+            <th>Type</th>
+            <th>Category</th>
+            <th>Amount</th>
+            <th>Description</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="transaction : ${transactions}">
+            <td th:text="${transaction.type}"></td>
+            <td th:text="${transaction.category}"></td>
+
+            <td th:text="${transaction.amount}"
+                th:classappend="${transaction.type.name() == 'EXPENSE'} ? 'red-text' : 'green-text'">
+            </td>
+
+            <td th:text="${transaction.description}"></td>
+
+            <td>
+                <!-- EDIT -->
+                <a th:href="@{/transactions/edit/{id}(id=${transaction.id})}"
+                   class="btn-small blue">
+                    <i class="material-icons">edit</i>
+                </a>
+
+                <!-- DELETE -->
+                <form th:action="@{/transactions/delete/{id}(id=${transaction.id})}"
+                      method="post"
+                      style="display:inline;"
+                      onsubmit="return confirm('Are you sure you want to delete this transaction?');">
+                    <button class="btn-small red" type="submit">
+                        <i class="material-icons">delete</i>
+                    </button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
     <h3>
-        <a href="transactions/new" style="text-decoration: none; color: inherit;">Add new transaction</a>
+        <a th:href="@{/transactions/new}"
+           style="text-decoration: none; color: inherit;">
+            Add new transaction
+        </a>
     </h3>
-    <form id="form">
-        <div class="form-control">
-            <label for="text">Text</label>
-            <input type="text" id="text" placeholder="Enter text..." />
-        </div>
-        <div class="form-control">
-            <label for="amount"
-            >Amount <br />
-                (negative - expense, positive - income)</label
-            >
-            <input type="number" id="amount" placeholder="Enter amount..." />
-        </div>
-        <button class="btn">Add transaction</button>
-    </form>
-</div>
-<script type="module" th:src="@{/js/script.js}"></script>
-
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         // Load Dark Mode
