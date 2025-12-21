@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
+<head>
+    <title>Analytics</title>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        .filter-card {
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div class="container" style="margin-top: 30px;">
+
+        <!-- Date Filter -->
+        <div class="card filter-card z-depth-1 hoverable">
+            <span class="card-title grey-text text-darken-2">Filter Range</span>
+            <form th:action="@{/reports}" method="get" class="row valign-wrapper" style="margin-bottom: 0;">
+                <div class="input-field col s12 m4">
+                    <input id="startDate" name="startDate" type="date" th:value="${startDate}" required>
+                    <label for="startDate" class="active">Start Date</label>
+                </div>
+                <div class="input-field col s12 m4">
+                    <input id="endDate" name="endDate" type="date" th:value="${endDate}" required>
+                    <label for="endDate" class="active">End Date</label>
+                </div>
+                <div class="col s12 m4 center-align">
+                    <button type="submit" class="btn waves-effect waves-light blue darken-1">
+                        Update Charts
+                        <i class="material-icons right">refresh</i>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Charts Grid -->
+        <div class="row">
+            <!-- Expenses by Category -->
+            <div class="col s12 m6">
+                <div class="card hoverable">
+                    <div class="card-content">
+                        <span class="card-title center-align">Expenses by Category</span>
+                        <div class="chart-container">
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Income vs Expenses -->
+            <div class="col s12 m6">
+                <div class="card hoverable">
+                    <div class="card-content">
+                        <span class="card-title center-align">Income vs Expenses</span>
+                        <div class="chart-container">
+                            <canvas id="flowChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card green lighten-5">
+            <div class="card-content">
+                        <span class="card-title green-text text-darken-4" style="font-size: 1.2rem; font-weight: bold;">
+                            <i class="material-icons left">download</i> Export to CSV
+                        </span>
+                <p class="green-text text-darken-3">
+                    Click here to generate a CSV report with your transactions for a given time interval.
+                </p>
+                <br>
+                <div class="right-align">
+                    <a th:href="@{/reports/export}" class="btn waves-effect waves-light green darken-3">
+                        <i class="material-icons left">download</i>Export
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <script layout:fragment="script" th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            /*<![CDATA[*/
+            // Data injected from Controller
+            const categories = /*[[${categoryLabels}]]*/ [];
+            const categoryData = /*[[${categoryValues}]]*/ [];
+
+            const flowLabels = /*[[${flowLabels}]]*/ ['Income', 'Expenses'];
+            const flowData = /*[[${flowValues}]]*/ [0, 0];
+
+            // 1. Category Chart (Doughnut)
+            const ctxCategory = document.getElementById('categoryChart').getContext('2d');
+            new Chart(ctxCategory, {
+                type: 'doughnut',
+                data: {
+                    labels: categories,
+                    datasets: [{
+                        data: categoryData,
+                        backgroundColor: [
+                            '#ef5350', '#42a5f5', '#66bb6a', '#ffca28', '#ab47bc', '#ffa726', '#8d6e63', '#78909c'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+
+            // 2. Flow Chart (Bar)
+            const ctxFlow = document.getElementById('flowChart').getContext('2d');
+            new Chart(ctxFlow, {
+                type: 'bar',
+                data: {
+                    labels: flowLabels,
+                    datasets: [{
+                        label: 'Amount ($)',
+                        data: flowData,
+                        backgroundColor: ['#66bb6a', '#ef5350']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+            /*]]>*/
+        });
+    </script>
+</div>
+
+
+</body>
+</html>

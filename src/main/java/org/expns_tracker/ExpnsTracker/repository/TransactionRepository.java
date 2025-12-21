@@ -130,8 +130,8 @@ public class TransactionRepository {
                 batch.commit().get();
                 log.info("Saved batch of {} transactions.", batchList.size());
             } catch (InterruptedException | ExecutionException e) {
-                log.error("Failed to save transaction batch", e);
-                throw new RuntimeException("Firestore batch save failed", e);
+                log.error("Failed to addTransaction transaction batch", e);
+                throw new RuntimeException("Firestore batch addTransaction failed", e);
             }
         }
 

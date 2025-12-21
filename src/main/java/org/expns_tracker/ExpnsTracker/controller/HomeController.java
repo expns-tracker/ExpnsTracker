@@ -46,30 +46,9 @@ public class HomeController {
     }
 
 
-
-//    @GetMapping("/profile")
-//    public String profile(){
-//        return "profile";
-//    }
-
     @GetMapping("/import")
     public String imports(){
         return "import";
-    }
-
-    @GetMapping("/dashboard")
-    public String dashboard(){
-        return "dashboard";
-    }
-
-    @GetMapping("/charts")
-    public String charts(){
-        return "charts";
-    }
-
-    @GetMapping("/nav")
-    public String nav(){
-        return "navbar";
     }
 
     @GetMapping("/register")
