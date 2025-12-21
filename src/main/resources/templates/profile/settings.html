@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
+<head>
+    <title>Profile & Preferences | ExpnsTracker</title>
+    <style>
+        .card {
+            max-width: 450px;
+            margin: 0 auto;
+            padding: 20px 30px;
+            border-radius: 12px;
+        }
+
+        .section-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            color: #1976d2; /* Materialize Blue */
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        .input-field span {
+            font-size: 14px;
+            color: #555;
+        }
+
+        p label {
+            margin-bottom: 10px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div class="container" style="margin-top: 40px;">
+        <div class="row">
+            <div class="col s12">
+
+                <div class="card hoverable z-depth-1">
+                    <div class="card-content">
+                        <span class="card-title center blue-text text-darken-2">
+                            <br>
+                            Settings
+                        </span>
+
+                        <form th:action="@{/profile/settings/update}" th:object="${currentUser}" method="post" style="margin-top: 20px;">
+
+                            <!-- Spending Budgets -->
+                            <div class="section-title">Monthly Budget Limit</div>
+                            <div class="row">
+                                <div class="input-field ">
+                                    <i class="material-icons prefix grey-text">account_balance</i>
+                                    <input id="budget-limit" th:field="*{monthlyBudgetLimit}" type="number" step="0.01" required>
+                                    <label for="budget-limit">Budget Limit</label>
+                                </div>
+
+                            </div>
+
+                            <!-- Notifications Preferences -->
+                            <div class="section-title">Notifications</div>
+                            <p>
+                                <label>
+                                    <input type="checkbox" name="notifBudget" th:checked="*{notifBudget}"/>
+                                    <span>Alert me when budget limits are exceeded</span>
+                                </label>
+                            </p>
+
+                            <div class="card-action center-align" style="border-top: none; padding-top: 30px;">
+                                <button class="btn waves-effect waves-light blue darken-1 z-depth-1" type="submit">
+                                    Save Settings
+                                    <i class="material-icons right">save</i>
+                                </button>
+                                <br><br>
+                                <a th:href="@{/profile}" class="grey-text">Back to Profile</a>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

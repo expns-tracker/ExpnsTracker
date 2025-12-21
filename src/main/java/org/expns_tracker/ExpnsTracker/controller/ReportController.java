@@ -25,17 +25,17 @@ public class ReportController {
 
     private final CsvExportService csvExportService;
 
-    @GetMapping
+    @GetMapping("/export")
     public String showReportPage(Model model) {
         ReportRequest request = new ReportRequest();
         request.setStartDate(LocalDate.now().withDayOfMonth(1));
         request.setEndDate(LocalDate.now());
 
         model.addAttribute("reportRequest", request);
-        return "reports/reports";
+        return "reports/export_transactions";
     }
 
-    @PostMapping("/generate")
+    @PostMapping("/export/generate")
     public String generateReport(@AuthenticationPrincipal String userId,
                                  @ModelAttribute ReportRequest request,
                                  RedirectAttributes redirectAttributes) {
@@ -50,10 +50,10 @@ public class ReportController {
             redirectAttributes.addFlashAttribute("errorMessage", "An unexpected error occurred.");
         }
 
-        return "redirect:/reports";
+        return "redirect:/reports/export";
     }
 
-    @GetMapping("/download")
+    @GetMapping("/export/download")
     public ResponseEntity<Resource> downloadReport(@AuthenticationPrincipal String userId) {
         try {
             Resource csvContent = csvExportService.getLastExportResource(userId);

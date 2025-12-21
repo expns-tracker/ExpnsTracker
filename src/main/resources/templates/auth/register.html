@@ -1,68 +1,97 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
 <head>
     <title>Register | ExpnsTracker</title>
-    <!-- Materialize CSS -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Page Specific CSS -->
     <link th:href="@{/css/register.css}" rel="stylesheet">
     <style>
-
+        .card {
+            max-width: 500px;
+            margin: 0 auto;
+            border-radius: 12px;
+            padding: 20px;
+        }
     </style>
 </head>
 <body>
 
-<div class="card z-depth-3">
-    <h4 class="center-align">Create Account</h4>
-    <br />
+<div layout:fragment="content">
+    <div class="container" style="margin-top: 40px;">
+        <div class="row">
+            <div class="col s12 m8 offset-m2 l6 offset-l3">
+                <div class="card z-depth-3 hoverable">
+                    <div class="card-content">
+                        <h4 class="center-align blue-text text-darken-2">Create Account</h4>
+                        <p class="center-align grey-text">Join us to track your expenses.</p>
+                        <br />
 
-    <div class="error-message" id="error-message"></div>
+                        <div class="error-message red-text center-align" id="error-message" style="margin-bottom: 15px;"></div>
 
-    <form onsubmit="signup(); return false;">
-        <div class="input-field">
-            <input id="email" type="email" class="validate" required>
-            <label for="email">Email</label>
+                        <form onsubmit="signup(); return false;">
+                            <div class="input-field">
+                                <input id="email" type="email" class="validate" required>
+                                <label for="email">Email</label>
+                            </div>
+
+                            <div class="input-field">
+                                <input id="password" type="password" class="validate" required>
+                                <label for="password">Password</label>
+                                <i class="material-icons suffix toggle-password" style="cursor: pointer;" onclick="togglePassword('password', this)">visibility</i>
+                            </div>
+
+                            <div class="input-field">
+                                <input id="confirm-password" type="password" class="validate" required>
+                                <label for="confirm-password">Confirm Password</label>
+                                <i class="material-icons suffix toggle-password" style="cursor: pointer;" onclick="togglePassword('confirm-password', this)">visibility</i>
+                                <span class="helper-text red-text" id="confirm-error"></span>
+                            </div>
+
+                            <div class="center-align" style="margin-top: 20px;">
+                                <button class="btn waves-effect waves-light blue darken-1" style="width: 100%;" type="submit">
+
+                                    Sign Up
+
+                                </button>
+                            </div>
+                        </form>
+
+                        <div style="margin-top: 25px; margin-bottom: 25px; border-bottom: 1px solid #ddd;"></div>
+
+                        <!-- Google Sign-In -->
+                        <div class="center-align">
+                            <button type="button" onclick="signInWithGoogle()" class="btn waves-effect waves-light red darken-1" style="width: 100%;">
+                                <i class="material-icons left">public</i> Sign up with Google
+                            </button>
+                        </div>
+
+                        <br />
+                        <p class="center-align">
+                            Already have an account? <a th:href="@{/login}" class="blue-text text-darken-2">Login here</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
-
-        <div class="input-field">
-            <input id="password" type="password" class="validate" required>
-            <label for="password">Password</label>
-            <i class="material-icons toggle-password" onclick="togglePassword('password', this)">visibility</i>
-        </div>
-
-        <div class="input-field">
-            <input id="confirm-password" type="password" class="validate" required>
-            <label for="confirm-password">Confirm Password</label>
-            <i class="material-icons toggle-password" onclick="togglePassword('confirm-password', this)">visibility</i>
-            <span class="helper-text" id="confirm-error" data-error="Passwords do not match"></span>
-        </div>
-        <div class="center-align">
-
-        <button class="btn waves-effect waves-light" type="submit">
-            Sign Up
-        </button>
-        </div>
-        <hr>
-        <!-- Buton Google Sign-In -->
-        <!-- Google Sign-In Button simplu -->
-        <div class="center-align" style="margin-top: 1rem;">
-            <button type="button" onclick="signInWithGoogle()" class="btn red darken-1 black-text" style="width: 100%; max-width: 300px;">
-                Sign in with Google
-            </button>
-        </div>
-
-
-
-        <br /><br />
-        <p class="center-align" style="margin-top: 1rem;">
-            Already have an account? <a th:href="@{/login}">Login</a>
-        </p>
-    </form>
+    </div>
+    <script type="module" th:src="@{/js/register.js}"></script>
 </div>
 
-<!-- Materialize JS -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-<script type="module" th:src="@{/js/register.js}"></script>
+
+<script layout:fragment="script">
+    function togglePassword(id, icon) {
+        const input = document.getElementById(id);
+        if (input.type === "password") {
+            input.type = "text";
+            icon.textContent = "visibility_off";
+        } else {
+            input.type = "password";
+            icon.textContent = "visibility";
+        }
+    }
+</script>
 
 </body>
 </html>

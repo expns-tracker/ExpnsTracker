@@ -3,6 +3,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -16,6 +17,8 @@ import org.expns_tracker.ExpnsTracker.entity.enums.TransactionType;
 import org.springframework.stereotype.Repository;
 
 import java.util.concurrent.ExecutionException;
+
+import static com.google.cloud.firestore.AggregateField.sum;
 
 @Repository
 @RequiredArgsConstructor
@@ -66,7 +69,45 @@ public class TransactionRepository {
         return result;
     }
 
+    public List<Transaction> findByUserIdAndMonth(String userId, int year, int month) throws ExecutionException, InterruptedException {
 
+        LocalDate startLocalDate = LocalDate.of(year, month, 1);
+        Date startDate = Date.from(startLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        Date endDate = Date.from(startLocalDate.plusMonths(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+        CollectionReference transactionsRef = firestore.collection(COLLECTION_NAME);
+
+        Query query = transactionsRef
+                .whereEqualTo("userId", userId)
+                .whereGreaterThanOrEqualTo("date", startDate)
+                .whereLessThan("date", endDate);
+
+        List<Transaction> result = new ArrayList<>();
+        ApiFuture<QuerySnapshot> querySnapshot = query.get();
+
+        for (DocumentSnapshot doc : querySnapshot.get().getDocuments()) {
+            Transaction transaction = doc.toObject(Transaction.class);
+            result.add(transaction);
+        }
+
+        return result;
+    }
+
+    public Double calculateTotalAmountByUserId(String userId) {
+        try {
+            Query query = firestore.collection(COLLECTION_NAME)
+                    .whereEqualTo("userId", userId);
+
+            AggregateQuery aggregateQuery = query.aggregate(sum("amount"));
+            AggregateQuerySnapshot snapshot = aggregateQuery.get().get();
+
+            return (Double) snapshot.get(sum("amount"));
+
+        } catch (InterruptedException | ExecutionException e) {
+            log.error("Failed to calculate total for user {}", userId, e);
+            return 0.0;
+        }
+    }
     public void saveAll(List<Transaction> transactionsToSave) {
         if (transactionsToSave == null || transactionsToSave.isEmpty()) {
             return;
@@ -104,5 +145,56 @@ public class TransactionRepository {
                 .get()
                 .get()
                 .toObjects(Transaction.class);
+    }
+
+    public List<Transaction> findNByUserIdOrderByDate(String userId, Integer n) throws ExecutionException, InterruptedException {
+        Query query = firestore.collection(COLLECTION_NAME)
+                .whereEqualTo("userId", userId)
+                .orderBy("date", Query.Direction.DESCENDING)
+                .limit(n);
+
+        ApiFuture<QuerySnapshot> querySnapshot = query.get();
+
+        List<Transaction> transactions = new ArrayList<>();
+        for (DocumentSnapshot doc : querySnapshot.get().getDocuments()) {
+            Transaction tx = doc.toObject(Transaction.class);
+            if (tx != null) {
+                tx.setId(doc.getId());
+                transactions.add(tx);
+            }
+        }
+
+        return transactions;
+    }
+
+    public List<Transaction> findByUserIdAndPage(String userId, int page, int size) {
+        try {
+            return firestore.collection(COLLECTION_NAME)
+                    .whereEqualTo("userId", userId)
+                    .orderBy("date", Query.Direction.DESCENDING)
+                    .offset(page * size)
+                    .limit(size)
+                    .get().get()
+                    .toObjects(Transaction.class);
+        } catch (Exception e) {
+            return Collections.emptyList();
+        }
+    }
+
+    public long countTransactions(String userId) {
+        try {
+            Query query = firestore.collection(COLLECTION_NAME)
+                    .whereEqualTo("userId", userId);
+
+            AggregateQuery aggregateQuery = query.count();
+
+            AggregateQuerySnapshot snapshot = aggregateQuery.get().get();
+
+            return snapshot.getCount();
+
+        } catch (InterruptedException | ExecutionException e) {
+            log.error("Failed to count transactions for user {}", userId, e);
+            return 0;
+        }
     }
 }
