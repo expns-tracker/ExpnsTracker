@@ -1,22 +1,24 @@
 package org.expns_tracker.ExpnsTracker.controller;
 
-import com.google.cloud.Timestamp;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.expns_tracker.ExpnsTracker.dto.TransactionDto;
-import org.expns_tracker.ExpnsTracker.entity.Category;
 import org.expns_tracker.ExpnsTracker.entity.Transaction;
 import org.expns_tracker.ExpnsTracker.entity.enums.TransactionType;
-import org.expns_tracker.ExpnsTracker.repository.CategoryRepository;
 import org.expns_tracker.ExpnsTracker.repository.TransactionRepository;
 import org.expns_tracker.ExpnsTracker.service.CategoryService;
 import org.expns_tracker.ExpnsTracker.service.TransactionService;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +27,7 @@ import java.util.Map;
 @Controller
 @RequestMapping("/transactions")
 @RequiredArgsConstructor
+@Log4j2
 public class TransactionController {
 
     private final TransactionRepository transactionRepository;
@@ -71,13 +74,18 @@ public class TransactionController {
     public String addTransaction(
             @ModelAttribute("transaction") Transaction transaction,
             BindingResult bindingResult,
-            @AuthenticationPrincipal String userId
+            @AuthenticationPrincipal String userId,
+            RedirectAttributes redirectAttributes
     ) {
         if (bindingResult.hasErrors()) {
             return "transactions/new";
         }
 
-        transactionService.save(transaction, userId);
+        transactionService.addTransaction(transaction, userId);
+
+        redirectAttributes.addFlashAttribute(
+                "successMessage", "Transaction added successfully!"
+        );
 
         return "redirect:/transactions";
     }
@@ -89,9 +97,17 @@ public class TransactionController {
             return "redirect:/transactions";
         }
 
+        try {
+            Map<String, String> categoriesMap = categoryService.getCategoriesMap();
+            model.addAttribute("categoriesMap", categoriesMap);
+
+        } catch (Exception e) {
+            model.addAttribute("categoriesMap", new HashMap<>());
+        }
+
         model.addAttribute("transaction", transaction);
         model.addAttribute("types", TransactionType.values());
-        return "edit";
+        return "transactions/edit";
     }
 
     @PostMapping("/edit/{id}")
@@ -99,24 +115,51 @@ public class TransactionController {
             @PathVariable String id,
             @ModelAttribute("transaction") Transaction transaction,
             BindingResult bindingResult,
-            @AuthenticationPrincipal String userId
+            Model model,
+            RedirectAttributes redirectAttributes
     ) {
         if (bindingResult.hasErrors()) {
-            return "edit";
+            log.error(Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
+            try {
+                Map<String, String> categoriesMap = categoryService.getCategoriesMap();
+                model.addAttribute("categoriesMap", categoriesMap);
+
+            } catch (Exception e) {
+                model.addAttribute("categoriesMap", new HashMap<>());
+            }
+
+            model.addAttribute("transaction", transaction);
+            model.addAttribute("types", TransactionType.values());
+
+            return "transactions/edit";
         }
 
-        transaction.setId(id);
-        transaction.setUserId(userId);
-        transaction.setDate(Timestamp.now()); // or keep old date if preferred
-
-        transactionRepository.save(transaction);
+        transactionService.updateTransaction(transaction);
+        redirectAttributes.addFlashAttribute(
+                "successMessage", "Transaction updated successfully!"
+        );
 
         return "redirect:/transactions";
     }
 
     @PostMapping("/delete/{id}")
-    public String deleteTransaction(@PathVariable String id) {
-        transactionRepository.delete(id);
+    public String deleteTransaction(
+            @PathVariable String id,
+            @AuthenticationPrincipal String userId,
+            RedirectAttributes redirectAttributes
+    ) {
+
+        if (!userId.equals(transactionService.getTransaction(id).getUserId())){
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "You are not authorized to delete this transaction."
+            );
+        }
+
+        transactionService.delete(id, userId);
+        redirectAttributes.addFlashAttribute(
+                "successMessage", "Transaction has been deleted!"
+        );
         return "redirect:/transactions";
     }
 

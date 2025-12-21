@@ -75,7 +75,7 @@ public class TransactionService {
         }
     }
 
-    public void save(Transaction transaction, String userId) {
+    public void addTransaction(Transaction transaction, String userId) {
         transaction.setDate(Timestamp.now());
         transaction.setUserId(userId);
         if (transaction.getType().equals(TransactionType.EXPENSE)) {
@@ -92,6 +92,31 @@ public class TransactionService {
 
         notifyObservers(userService.getUser(userId));
     }
+
+    public void updateTransaction(Transaction transaction) {
+        Transaction oldTransaction = null;
+        try {
+            oldTransaction = transactionRepository.findById(transaction.getId());
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        transaction.setCreatedAt(oldTransaction.getCreatedAt());
+        transaction.setDate(oldTransaction.getDate());
+        transaction.setUpdatedAt(null);
+
+        if (transaction.getType().equals(TransactionType.EXPENSE)) {
+            transaction.setAmount(-Math.abs(transaction.getAmount()));
+        } else {
+            transaction.setAmount(Math.abs(transaction.getAmount()));
+        }
+
+        transactionRepository.save(transaction);
+
+        notifyObservers(userService.getUser(transaction.getUserId()));
+    }
+
+
 
     public List<TransactionDto> getTransactions(String userId, int page, int size) {
         return transactionRepository.findByUserIdAndPage(
@@ -114,4 +139,18 @@ public class TransactionService {
         }
     }
 
+    public void delete(String id, String userId) {
+        transactionRepository.delete(id);
+        notifyObservers(userService.getUser(userId));
+    }
+
+    public Transaction getTransaction(String id) {
+        try {
+            return transactionRepository.findById(
+                    id
+            );
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

@@ -4,7 +4,7 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{fragments/layout}">
 <head>
-    <title>Add Transaction</title>
+    <title>Edit Transaction</title>
 </head>
 <body>
 
@@ -16,16 +16,18 @@
                 <div class="card hoverable z-depth-2">
                     <div class="card-content">
                         <span class="card-title center blue-text text-darken-2">
-                            Add Transaction
+                            Edit Transaction
                         </span>
 
-                        <form th:action="@{/transactions/new}" th:object="${transaction}" method="post" style="margin-top: 30px;">
+                        <form th:action="@{/transactions/edit/{id}(id=${transaction.id})}" th:object="${transaction}" method="post" style="margin-top: 30px;">
+
+                            <input type="hidden" th:field="*{id}" />
+                            <input type="hidden"  th:field="*{userId}" />
 
                             <!-- Transaction Type -->
                             <div class="input-field">
                                 <i class="material-icons prefix grey-text">swap_horiz</i>
                                 <select th:field="*{type}" required>
-                                    <option value="" disabled selected>Choose type</option>
                                     <option th:each="type : ${types}"
                                             th:value="${type}"
                                             th:text="${type}">
@@ -38,12 +40,11 @@
                             <div class="input-field">
                                 <i class="material-icons prefix grey-text">category</i>
                                 <select th:field="*{categoryId}" required>
-                                    <option value="" disabled selected>Choose category</option>
-
-                                    <!-- Iterate over the Map entries -->
+                                    <!-- Iterate over the Map (Key=ID, Value=Name) provided by Controller -->
                                     <option th:each="entry : ${categoriesMap}"
                                             th:value="${entry.key}"
-                                            th:text="${entry.value}">
+                                            th:text="${entry.value}"
+                                            th:selected="${entry.key == transaction.categoryId}">
                                         Food & Drinks
                                     </option>
                                 </select>
@@ -53,28 +54,27 @@
                             <!-- Amount -->
                             <div class="input-field">
                                 <i class="material-icons prefix grey-text">attach_money</i>
-                                <input id="amount" type="number" step="0.01" th:field="*{amount}" required class="validate">
-                                <label for="amount">Amount</label>
-                                <span class="helper-text red-text"
-                                      th:if="${#fields.hasErrors('amount')}"
-                                      th:errors="*{amount}"></span>
+                                <input id="amount" type="number" step="0.01"
+                                       th:value="${transaction.amount}"
+                                       name="amount"
+                                       required class="validate">
+                                <label for="amount" class="active">Amount</label>
                             </div>
 
                             <!-- Description -->
                             <div class="input-field">
                                 <i class="material-icons prefix grey-text">description</i>
                                 <textarea id="description" th:field="*{description}" class="materialize-textarea"></textarea>
-                                <label for="description">Description (optional)</label>
+                                <label for="description" class="active">Description</label>
                             </div>
 
-
                             <div class="card-action center-align" style="border-top: none; padding-top: 20px;">
-                                <button class="btn-large waves-effect waves-light blue darken-1 z-depth-1" type="submit">
-                                    Save Transaction
-                                    <i class="material-icons right">save</i>
+                                <button class="btn waves-effect waves-light blue darken-1 z-depth-1" type="submit">
+                                    Update Transaction
+                                    <i class="material-icons right">update</i>
                                 </button>
                                 <br><br>
-                                <a th:href="@{/transactions}" class="grey-text">Back to Transactions</a>
+                                <a th:href="@{/transactions}" class="grey-text">Cancel</a>
                             </div>
 
                         </form>
