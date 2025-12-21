@@ -197,4 +197,20 @@ public class TransactionRepository {
             return 0;
         }
     }
+
+    public List<Transaction> findByUserId(String userId) throws ExecutionException, InterruptedException {
+        CollectionReference transactionsRef = firestore.collection(COLLECTION_NAME);
+
+        Query query = transactionsRef.whereEqualTo("userId", userId);
+
+        List<Transaction> result = new ArrayList<>();
+        ApiFuture<QuerySnapshot> querySnapshot = query.get();
+
+        for (DocumentSnapshot doc : querySnapshot.get().getDocuments()) {
+            Transaction transaction = doc.toObject(Transaction.class);
+            result.add(transaction);
+        }
+
+        return result;
+    }
 }

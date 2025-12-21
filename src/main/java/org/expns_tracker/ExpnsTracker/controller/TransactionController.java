@@ -16,6 +16,8 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+
+import java.util.concurrent.ExecutionException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,5 +80,50 @@ public class TransactionController {
         transactionService.save(transaction, userId);
 
         return "redirect:/transactions";
+    }
+    @GetMapping("/edit/{id}")
+    public String showEditTransactionForm(@PathVariable String id, Model model) throws ExecutionException, InterruptedException {
+        Transaction transaction = transactionRepository.findById(id);
+
+        if (transaction == null) {
+            return "redirect:/transactions";
+        }
+
+        model.addAttribute("transaction", transaction);
+        model.addAttribute("types", TransactionType.values());
+        return "edit";
+    }
+
+    @PostMapping("/edit/{id}")
+    public String updateTransaction(
+            @PathVariable String id,
+            @ModelAttribute("transaction") Transaction transaction,
+            BindingResult bindingResult,
+            @AuthenticationPrincipal String userId
+    ) {
+        if (bindingResult.hasErrors()) {
+            return "edit";
+        }
+
+        transaction.setId(id);
+        transaction.setUserId(userId);
+        transaction.setDate(Timestamp.now()); // or keep old date if preferred
+
+        transactionRepository.save(transaction);
+
+        return "redirect:/transactions";
+    }
+
+    @PostMapping("/delete/{id}")
+    public String deleteTransaction(@PathVariable String id) {
+        transactionRepository.delete(id);
+        return "redirect:/transactions";
+    }
+
+    @GetMapping("/all")
+    public String listTransactions(Model model, @AuthenticationPrincipal String userId) throws ExecutionException, InterruptedException {
+        model.addAttribute("transactions",
+                transactionRepository.findByUserId(userId));
+        return "transactions";
     }
 }
