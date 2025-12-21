@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title layout:title-pattern="$CONTENT_TITLE | ExpnsTracker">ExpnsTracker</title>
+
+    <!-- Materialize CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <style>
+        body {
+            display: flex;
+            min-height: 100vh;
+            flex-direction: column;
+            background-color: #f4f6f8;
+        }
+        main {
+            flex: 1 0 auto;
+        }
+        /* Active menu styling */
+        nav ul li.active {
+            background-color: rgba(255,255,255,0.15);
+        }
+        /* Dark Mode */
+        body.dark-mode {
+            background: #121212;
+            color: #e0e0e0;
+        }
+        body.dark-mode .card, body.dark-mode .chart-box, body.dark-mode nav {
+            background-color: #1e1e1e !important;
+            color: #e0e0e0;
+        }
+        body.dark-mode a:not(.btn) {
+            color: #90caf9 !important;
+        }
+        /* Fix for footer sticking */
+        footer.page-footer {
+            margin-top: 0;
+            padding-top: 0;
+        }
+    </style>
+</head>
+<body class="grey lighten-5">
+
+<!-- Include Navbar Fragment -->
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<main>
+    <!-- Content Placeholder -->
+    <div layout:fragment="content"></div>
+</main>
+
+<footer class="page-footer blue darken-2">
+    <div class="footer-copyright">
+        <div class="container center">
+            © 2025 ExpenseTracker
+        </div>
+    </div>
+</footer>
+
+<!-- Materialize JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+<!-- Global Scripts (Toast & Init) -->
+<script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', function () {
+        // Manual Initialization is safer than AutoInit
+
+        // Sidenav
+        var sidenavs = document.querySelectorAll('.sidenav');
+        if (sidenavs.length > 0) {
+            M.Sidenav.init(sidenavs);
+        }
+
+        // Dropdown
+        var dropdowns = document.querySelectorAll('.dropdown-trigger');
+        if (dropdowns.length > 0) {
+            M.Dropdown.init(dropdowns, {
+                coverTrigger: false,
+                constrainWidth: false,
+                alignment: 'right'
+            });
+        }
+
+        // Select
+        var selects = document.querySelectorAll('select');
+        if (selects.length > 0) {
+            M.FormSelect.init(selects);
+        }
+
+        // Tooltips
+        var tooltips = document.querySelectorAll('.tooltipped');
+        if (tooltips.length > 0) {
+            M.Tooltip.init(tooltips);
+        }
+
+        // Dark Mode Init
+        if (localStorage.getItem("darkMode") === "true") {
+            document.body.classList.add("dark-mode");
+        }
+
+        /*<![CDATA[*/
+        var successMessage = /*[[${successMessage}]]*/ null;
+        var errorMessage = /*[[${errorMessage}]]*/ null;
+        var infoMessage = /*[[${infoMessage}]]*/ null;
+
+        if (successMessage) M.toast({html: '<span><i class="material-icons left">check_circle</i>' + successMessage + '</span>', classes: 'green darken-1 rounded'});
+        if (errorMessage) M.toast({html: '<span><i class="material-icons left">error</i>' + errorMessage + '</span>', classes: 'red darken-1 rounded'});
+        if (infoMessage) M.toast({html: '<span><i class="material-icons left">info</i>' + infoMessage + '</span>', classes: 'blue darken-1 rounded'});
+        /*]]>*/
+    });
+
+    function toggleDarkMode() {
+        document.body.classList.toggle("dark-mode");
+        localStorage.setItem("darkMode", document.body.classList.contains("dark-mode"));
+    }
+</script>
+</body>
+</html>

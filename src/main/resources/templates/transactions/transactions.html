@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
+<head>
+    <title>Transactions</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div class="container" style="margin-top: 30px;">
+
+        <div class="row">
+            <div class="col s12">
+                <div class="card hoverable">
+                    <div class="card-content">
+                        <span class="card-title">Transactions</span>
+
+                        <!-- Top Actions Bar -->
+                        <div class="row valign-wrapper" style="margin-bottom: 20px;">
+
+
+                            <div class="col s6 right-align">
+                                <a th:if="${currentUser.syncStatus != 'RUNNING'}"
+                                   th:href="@{/tink/load-transactions}"
+                                   class="btn waves-effect waves-light green darken-1" style="width: 100%; max-width: 200px; margin-bottom: 10px;">
+                                    <i class="material-icons left">sync</i>Sync Transactions
+                                </a>
+
+                                <button th:if="${currentUser.syncStatus == 'RUNNING'}" class="btn disabled" style="width: 100%; max-width: 200px; margin-bottom: 10px;">
+                                    <i class="material-icons left">hourglass_empty</i>Syncing...
+                                </button>
+
+                                <a th:href="@{/transactions/new}" class="btn waves-effect waves-light blue darken-1">
+                                    <i class="material-icons left">add</i>New Transaction
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Transactions Table -->
+                        <table class="highlight responsive-table">
+                            <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>Category</th>
+                                <th class="right-align">Amount</th>
+                                <th class="center-align">Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="tx : ${transactions}">
+                                <td th:text="${#dates.format(tx.date.toDate(), 'dd MMM yyyy')}">01 Dec 2025</td>
+                                <td th:text="${tx.description}">Starbucks</td>
+                                <td>
+                                    <span class="new badge blue" data-badge-caption="" th:text="${tx.categoryName ?: 'Uncategorized'}">Food</span>
+                                </td>
+                                <td class="right-align"
+                                    th:text="${#numbers.formatCurrency(tx.amount)}"
+                                    th:classappend="${tx.amount < 0} ? 'red-text' : 'green-text'">-€5.00</td>
+
+                                <td class="center-align">
+                                    <a th:href="@{/transactions/edit/{id}(id=${tx.id})}"
+                                       class="btn-flat btn-small waves-effect waves-blue tooltipped"
+                                       data-position="top" data-tooltip="Edit">
+                                        <i class="material-icons blue-text">edit</i>
+                                    </a>
+                                    <form th:action="@{/transactions/delete/{id}(id=${tx.id})}" method="post" style="display:inline;"
+                                          onsubmit="return confirm('Are you sure?');">
+                                        <button type="submit" class="btn-flat btn-small waves-effect waves-red tooltipped"
+                                                data-position="top" data-tooltip="Delete">
+                                            <i class="material-icons red-text">delete</i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+
+                            <tr th:if="${#lists.isEmpty(transactions)}">
+                                <td colspan="5" class="center-align grey-text" style="padding: 40px;">
+                                    No transactions found.
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Pagination Logic -->
+                        <ul class="pagination center-align" style="margin-top: 30px;" th:if="${totalPages > 1}">
+
+                            <!-- Previous Button -->
+                            <li th:classappend="${currentPage == 0} ? 'disabled'">
+                                <a th:href="${currentPage > 0} ? @{/transactions(page=${currentPage - 1})} : '#'">
+                                    <i class="material-icons">chevron_left</i>
+                                </a>
+                            </li>
+
+                            <!-- Page Numbers (Simple loop) -->
+                            <!-- Uses Thymeleaf sequence: 0 to totalPages-1 -->
+                            <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                                th:classappend="${currentPage == i} ? 'active blue darken-1' : 'waves-effect'">
+                                <a th:href="@{/transactions(page=${i})}" th:text="${i + 1}">1</a>
+                            </li>
+
+                            <!-- Next Button -->
+                            <li th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                                <a th:href="${currentPage < totalPages - 1} ? @{/transactions(page=${currentPage + 1})} : '#'">
+                                    <i class="material-icons">chevron_right</i>
+                                </a>
+                            </li>
+                        </ul>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>
