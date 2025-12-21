@@ -1,5 +1,6 @@
 package org.expns_tracker.ExpnsTracker.service;
 
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.expns_tracker.ExpnsTracker.entity.Category;
@@ -20,6 +21,7 @@ public class CategoryService {
     private final CategoryRepository categoryRepository;
     private final Map<String, String> categoryCache = new ConcurrentHashMap<>();
 
+    @PostConstruct
     public Map<String, String> getCategoriesMap() throws ExecutionException, InterruptedException {
         if (categoryCache.isEmpty()) {
             List<Category> categories = categoryRepository.findAll();
@@ -30,6 +32,10 @@ public class CategoryService {
         }
 
         return categoryCache;
+    }
+
+    public String getCategoryName(String categoryId){
+        return categoryCache.get(categoryId);
     }
 
 }

@@ -1,0 +1,65 @@
+<nav class="blue darken-2 z-depth-2" th:fragment="navbar">
+    <div class="nav-wrapper container">
+        <a href="/" class="brand-logo"><i class="material-icons left">account_balance_wallet</i>ExpnsTracker</a>
+        <a href="#" data-target="mobile-menu" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+
+        <ul id="nav-mobile" class="right hide-on-med-and-down">
+            <li th:if="${currentUser != null}" th:classappend="${activePage == 'transactions'} ? 'active'"><a href="/transactions"><i class="material-icons left">list</i>Transactions</a></li>
+            <li th:if="${currentUser != null}" th:classappend="${activePage == 'reports'} ? 'active'"><a href="/reports"><i class="material-icons left">assignment</i>Reports</a></li>
+
+            <!-- User Profile Dropdown -->
+            <li th:if="${currentUser != null}">
+                <a class="dropdown-trigger" href="#" data-target="profile-dropdown">
+                    <i class="material-icons left">account_circle</i>
+                    <span th:text="${currentUser.firstName}">User</span>
+                    <i class="material-icons right">arrow_drop_down</i>
+                </a>
+            </li>
+            <!-- Login if anonymous -->
+            <li th:if="${currentUser == null}">
+                <a href="/login"><i class="material-icons left">login</i>Login</a>
+            </li>
+        </ul>
+    </div>
+
+
+    <!-- Dropdown Structure -->
+    <ul id="profile-dropdown" class="dropdown-content">
+        <li><a href="/profile"><i class="material-icons">person</i>Profile</a></li>
+        <li><a href="/settings"><i class="material-icons">settings</i>Settings</a></li>
+        <li class="divider"></li>
+        <li>
+            <a href="#" onclick="toggleDarkMode()"><i class="material-icons">dark_mode</i>Dark Mode</a>
+        </li>
+        <li class="divider"></li>
+        <li>
+            <a th:href="@{/logout}" class="red-text" >
+                    <i class="material-icons left">logout</i>Logout
+            </a>
+        </li>
+    </ul>
+
+    <!-- Mobile Menu -->
+    <ul class="sidenav" id="mobile-menu">
+
+        <li th:if="${currentUser != null}"><a href="/"><i class="material-icons left">dashboard</i>Home</a></li>
+        <li th:if="${currentUser != null}"><a href="/transactions"><i class="material-icons left">list</i>Transactions</a></li>
+        <li th:if="${currentUser != null}"><a href="/reports"><i class="material-icons left">assignment</i>Reports</a></li>
+
+        <li th:if="${currentUser != null}"><a href="/profile"><i class="material-icons">person</i>Profile</a></li>
+        <li th:if="${currentUser != null}"><a href="/settings"><i class="material-icons">settings</i>Settings</a></li>
+        <li class="divider"></li>
+        <li>
+            <a href="#" onclick="toggleDarkMode()"><i class="material-icons">dark_mode</i>Dark Mode</a>
+        </li>
+        <li class="divider"></li>
+        <li th:if="${currentUser != null}">
+            <a th:href="@{/logout}" class="red-text" >
+                <i class="material-icons left">logout</i>Logout
+            </a>
+        </li>
+        <li th:if="${currentUser == null}">
+            <a href="/login"><i class="material-icons left">login</i>Login</a>
+        </li>
+    </ul>
+</nav>

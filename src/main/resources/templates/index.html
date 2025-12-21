@@ -1,113 +1,159 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home | ExpnsTracker</title>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <title>Home</title>
     <style>
-        body {
-            display: flex;
-            min-height: 100vh;
-            flex-direction: column;
-        }
-        main {
-            flex: 1 0 auto;
+        @media only screen and (max-width: 600px) {
+            .stat-card-title {
+                font-size: 1.1rem !important;
+            }
+            .stat-card-value {
+                font-size: 1.4rem !important;
+            }
+            .card.horizontal {
+                display: block !important;
+            }
+            .card.horizontal .card-image {
+                max-width: 100% !important;
+                width: 100% !important;
+                height: 60px !important;
+            }
+            .card.horizontal .card-stacked {
+                width: 100% !important;
+            }
+            .table-responsive {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
         }
     </style>
 </head>
 <body>
-<main>
-<nav class="blue darken-2 z-depth-2">
-    <div class="nav-wrapper container">
-        <a href="/" class="brand-logo"><i class="material-icons left">account_balance</i>ExpnsTracker</a>
-        <ul id="nav-mobile" class="right hide-on-med-and-down">
-            <li class="active"><a href="/"><i class="material-icons left">dashboard</i>Dashboard</a></li>
-            <li><a href="/reports"><i class="material-icons left">assignment</i>Reports</a></li>
 
-            <li th:if="${currentUser != null}">
-                <a href="/profile">
-                    <i class="material-icons left">person</i><span th:text="${currentUser.firstName}">User</span>
-                </a>
-            </li>
-        </ul>
-    </div>
-</nav>
+<div layout:fragment="content">
+    <div class="container" style="margin-top: 30px;">
 
-<div class="container" style="margin-top: 20px;">
+        <div class="row center-align" th:if="${currentUser != null}">
+            <div class="col s12">
+                <h4 class="hide-on-small-only">Welcome back, <span th:text="${currentUser.firstName}">User</span>!</h4>
+                <h5 class="hide-on-med-and-up">Hi, <span th:text="${currentUser.firstName}">User</span>!</h5>
 
-    <div class="row center-align">
-        <div class="col s12">
-            <h4>Welcome Back</h4>
-            <p class="flow-text">Manage your expenses securely and efficiently.</p>
+                <p class="flow-text grey-text text-darken-1" style="font-size: 1.1rem;">Manage your expenses securely.</p>
 
-            <a th:href="@{/tink/connect}" class="btn-large waves-effect waves-light blue">
-                <i class="material-icons left">account_balance</i>
-                Connect Bank Account
-            </a>
+                <div style="margin-top: 20px;">
+                    <a th:href="@{/tink/connect}" class="btn waves-effect waves-light blue darken-1" style="width: 100%; max-width: 200px; margin-bottom: 10px;">
+                        <i class="material-icons left">link</i>Connect Bank
+                    </a>
 
-            <a th:if="${currentUser != null and currentUser.syncStatus != 'RUNNING'}" th:href="@{/tink/load-transactions}" class="btn-large waves-effect waves-light green">
-                <i class="material-icons left">update</i>
-                Load Transactions
-            </a>
+                    <a th:if="${currentUser.syncStatus != 'RUNNING'}"
+                       th:href="@{/tink/load-transactions}"
+                       class="btn waves-effect waves-light green darken-1" style="width: 100%; max-width: 200px; margin-bottom: 10px;">
+                        <i class="material-icons left">sync</i>Sync Now
+                    </a>
 
-            <a th:if="${currentUser != null and currentUser.syncStatus == 'RUNNING'}"
-                    class="btn-large disabled">
-                Sync in progress...
-                <i class="material-icons right">hourglass_empty</i>
-            </a>
-
-
+                    <button th:if="${currentUser.syncStatus == 'RUNNING'}" class="btn disabled" style="width: 100%; max-width: 200px; margin-bottom: 10px;">
+                        <i class="material-icons left">hourglass_empty</i>Syncing...
+                    </button>
+                </div>
+            </div>
         </div>
+
+        <!-- Dashboard Stats -->
+        <div class="row" style="margin-top: 30px;" th:if="${currentUser != null}">
+
+            <!-- 1. Current Balance -->
+            <div class="col s12">
+                <div class="card horizontal hoverable blue lighten-5 z-depth-1">
+                    <div class="card-image blue lighten-1 center-align valign-wrapper">
+                        <i class="material-icons white-text large" style="width: 100%;">account_balance</i>
+                    </div>
+                    <div class="card-stacked">
+                        <div class="card-content" style="padding: 20px;">
+                            <span class="card-title blue-text text-darken-2 stat-card-title">Current Balance</span>
+                            <!-- Calculation: Income - Expenses -->
+                            <h4 class="stat-card-value" style="margin-top: 10px;" th:text="${#numbers.formatCurrency(currentUser.balance ?: 0)}">€0.00</h4>
+                            <p class="grey-text">Net Flow</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Total Income -->
+            <div class="col s12 m6">
+                <div class="card horizontal hoverable green lighten-5 z-depth-1">
+                    <div class="card-image green lighten-1 center-align valign-wrapper">
+                        <i class="material-icons white-text medium" style="width: 100%;">trending_up</i>
+                    </div>
+                    <div class="card-stacked">
+                        <div class="card-content" style="padding: 15px;">
+                            <span class="card-title green-text text-darken-2 stat-card-title">Income</span>
+
+                            <h5 class="stat-card-value" th:text="${#numbers.formatCurrency(currentUser.currentMonthIncome ?: 0)}">€0.00</h5>
+                            <p class="grey-text">Current Month</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col s12 m6">
+                <div class="card horizontal hoverable red lighten-5 z-depth-1">
+                    <div class="card-image red lighten-1 center-align valign-wrapper">
+                        <i class="material-icons white-text medium" style="width: 100%;">trending_down</i>
+                    </div>
+                    <div class="card-stacked">
+                        <div class="card-content" style="padding: 15px;">
+                            <span class="card-title red-text text-darken-2 stat-card-title">Expenses</span>
+                            <h5 class="stat-card-value" th:text="${#numbers.formatCurrency(currentUser.currentMonthExpenses ?: 0)}">€0.00</h5>
+                            <p class="grey-text">Current Month</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity Table -->
+        <div class="row" th:if="${currentUser != null}">
+            <div class="col s12">
+                <div class="card z-depth-1">
+                    <div class="card-content">
+                        <span class="card-title">Recent Activity</span>
+                        <div class="table-responsive">
+                            <table class="highlight responsive-table">
+                                <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Description</th>
+                                    <th>Category</th>
+                                    <th>Amount</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="tx : ${recentTransactions}">
+                                    <td th:text="${#dates.format(tx.date.toDate(), 'dd MMM')}">01 Dec</td>
+                                    <td th:text="${tx.description}" style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Coffee</td>
+                                    <td><span class="new badge blue" data-badge-caption="" th:text="${tx.categoryName}">Food</span></td>
+                                    <td th:text="${#numbers.formatCurrency(tx.amount)}"
+                                        th:class="${tx.amount < 0} ? 'red-text' : 'green-text'">-€5.00</td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(recentTransactions)}">
+                                    <td colspan="4" class="center-align grey-text">No recent transactions found.</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="card-action right-align">
+                            <a href="/transactions" class="blue-text">View All</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
-</main>
 
-<footer class="page-footer blue darken-2" style="padding-top: 0; margin-top: auto;">
-    <div class="footer-copyright">
-        <div class="container center">
-            © 2025 ExpnsTracker
-        </div>
-    </div>
-</footer>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-<!-- Server-Side Notifications (Toasts) -->
-<script th:inline="javascript">
-    document.addEventListener('DOMContentLoaded', function () {
-        /*<![CDATA[*/
-        // Thymeleaf will inline the values here. If value is null, it stays null.
-        var successMessage = /*[[${successMessage}]]*/ null;
-        var errorMessage = /*[[${errorMessage}]]*/ null;
-        var infoMessage = /*[[${infoMessage}]]*/ null;
-
-        // Check and display toasts
-        if (successMessage) {
-            M.toast({
-                html: '<span><i class="material-icons left">check_circle</i>' + successMessage + '</span>',
-                classes: 'green darken-1 rounded',
-                displayLength: 4000
-            });
-        }
-
-        if (errorMessage) {
-            M.toast({
-                html: '<span><i class="material-icons left">error</i>' + errorMessage + '</span>',
-                classes: 'red darken-1 rounded',
-                displayLength: 5000
-            });
-        }
-
-        if (infoMessage) {
-            M.toast({
-                html: '<span><i class="material-icons left">info</i>' + infoMessage + '</span>',
-                classes: 'blue darken-1 rounded',
-                displayLength: 4000
-            });
-        }
-        /*]]>*/
-    });
-</script>
 </body>
 </html>

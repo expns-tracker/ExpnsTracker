@@ -1,16 +1,11 @@
 package org.expns_tracker.ExpnsTracker.service;
 
 import lombok.RequiredArgsConstructor;
-import org.expns_tracker.ExpnsTracker.entity.Transaction;
 import org.expns_tracker.ExpnsTracker.entity.User;
-import org.expns_tracker.ExpnsTracker.entity.enums.TransactionType;
 import org.expns_tracker.ExpnsTracker.repository.TransactionRepository;
 import org.expns_tracker.ExpnsTracker.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 @Service
 @RequiredArgsConstructor

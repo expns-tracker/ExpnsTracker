@@ -1,6 +1,7 @@
 package org.expns_tracker.ExpnsTracker.observer.concrete;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import lombok.extern.slf4j.Slf4j;
 import org.expns_tracker.ExpnsTracker.entity.Transaction;
 import org.expns_tracker.ExpnsTracker.entity.User;
@@ -12,9 +13,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Slf4j
+@Log4j2
 @Component
-@Order(2)
+@Order(3)
 @RequiredArgsConstructor
 public class BudgetAlertObserver implements TransactionObserver {
 

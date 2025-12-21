@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
+<head>
+    <title>Add Transaction</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div class="container" style="margin-top: 40px;">
+        <div class="row">
+            <div class="col s12 m8 offset-m2 l6 offset-l3">
+
+                <div class="card hoverable z-depth-2">
+                    <div class="card-content">
+                        <span class="card-title center blue-text text-darken-2">
+                            <i class="material-icons medium" style="vertical-align: middle;">add_circle</i><br>
+                            Add Transaction
+                        </span>
+
+                        <form th:action="@{/transactions/new}" th:object="${transaction}" method="post" style="margin-top: 30px;">
+
+                            <!-- Transaction Type -->
+                            <div class="input-field">
+                                <i class="material-icons prefix grey-text">swap_horiz</i>
+                                <select th:field="*{type}" required>
+                                    <option value="" disabled selected>Choose type</option>
+                                    <option th:each="type : ${types}"
+                                            th:value="${type}"
+                                            th:text="${type}">
+                                    </option>
+                                </select>
+                                <label>Transaction Type</label>
+                            </div>
+
+                            <!-- Category Selection -->
+                            <div class="input-field">
+                                <i class="material-icons prefix grey-text">category</i>
+                                <select th:field="*{categoryId}" required>
+                                    <option value="" disabled selected>Choose category</option>
+
+                                    <!-- Iterate over the Map entries -->
+                                    <option th:each="entry : ${categoriesMap}"
+                                            th:value="${entry.key}"
+                                            th:text="${entry.value}">
+                                        Food & Drinks
+                                    </option>
+                                </select>
+                                <label>Category</label>
+                            </div>
+
+                            <!-- Amount -->
+                            <div class="input-field">
+                                <i class="material-icons prefix grey-text">euro</i>
+                                <input id="amount" type="number" step="0.01" th:field="*{amount}" required class="validate">
+                                <label for="amount">Amount</label>
+                                <span class="helper-text red-text"
+                                      th:if="${#fields.hasErrors('amount')}"
+                                      th:errors="*{amount}"></span>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="input-field">
+                                <i class="material-icons prefix grey-text">description</i>
+                                <textarea id="description" th:field="*{description}" class="materialize-textarea"></textarea>
+                                <label for="description">Description (optional)</label>
+                            </div>
+
+                            <!-- Date (Optional but good to have) -->
+                            <!-- If your entity has a date field and you want to allow manual date entry -->
+                            <!--
+                            <div class="input-field">
+                                <i class="material-icons prefix grey-text">event</i>
+                                <input id="date" type="date" th:field="*{date}" required>
+                                <label for="date" class="active">Date</label>
+                            </div>
+                            -->
+
+                            <div class="card-action center-align" style="border-top: none; padding-top: 20px;">
+                                <button class="btn-large waves-effect waves-light blue darken-1 z-depth-1" type="submit">
+                                    Save Transaction
+                                    <i class="material-icons right">save</i>
+                                </button>
+                                <br><br>
+                                <a th:href="@{/transactions}" class="grey-text">Back to Transactions</a>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
