@@ -31,6 +31,7 @@ public class User extends Auditable{
     private Double currentMonthExpenses;
     private Double currentMonthIncome;
     private Double balance;
+    private Boolean notifBudget;
 
     private Boolean isActive = true;
     private Boolean isVerified = false;

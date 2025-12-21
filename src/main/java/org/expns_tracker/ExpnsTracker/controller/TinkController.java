@@ -39,7 +39,7 @@ public class TinkController {
             redirectAttributes.addFlashAttribute(
                     "errorMessage", "Failed connection: " + error
             );
-            return "redirect:/";
+            return "redirect:/profile";
         }
 
 
@@ -56,7 +56,7 @@ public class TinkController {
             redirectAttributes.addFlashAttribute("errorMessage", "Server error during bank sync: " + e.getMessage());
         }
 
-        return "redirect:/";
+        return "redirect:/profile";
     }
 
     @GetMapping("/load-transactions")
@@ -75,6 +75,6 @@ public class TinkController {
             );
         }
 
-        return "redirect:/";
+        return "redirect:/transactions";
     }
 }

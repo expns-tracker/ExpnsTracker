@@ -38,7 +38,6 @@
                 <div class="card hoverable">
                     <div class="card-content">
                             <span class="card-title center blue-text text-darken-2">
-                                <i class="material-icons medium" style="vertical-align: middle;">download</i><br>
                                 Export Transactions
                             </span>
                         <p class="center grey-text text-darken-1" style="margin-bottom: 30px;">
@@ -67,7 +66,7 @@
                             <div class="card-action center-align" style="border-top: none; padding-top: 20px;">
                                 <!-- State: IDLE or FAILED or COMPLETED -->
                                 <button th:if="${currentUser != null and currentUser.exportStatus != 'RUNNING'}"
-                                        class="btn-large waves-effect waves-light blue darken-1 z-depth-1"
+                                        class="btn waves-effect waves-light blue darken-1 z-depth-1"
                                         type="submit" name="action">
                                     Generate CSV
                                     <i class="material-icons right">file_download</i>
@@ -75,7 +74,7 @@
 
                                 <!-- State: EXPORTING (Disabled) -->
                                 <button th:if="${currentUser != null and currentUser.exportStatus == 'RUNNING'}"
-                                        class="btn-large disabled">
+                                        class="btn disabled">
                                     Processing...
                                     <i class="material-icons right">hourglass_empty</i>
                                 </button>

@@ -45,15 +45,12 @@ public class HomeController {
         return "admin";
     }
 
-    @GetMapping("/settings")
-    public String settings(){
-        return "settings";
-    }
 
-    @GetMapping("/profile")
-    public String profile(){
-        return "profile";
-    }
+
+//    @GetMapping("/profile")
+//    public String profile(){
+//        return "profile";
+//    }
 
     @GetMapping("/import")
     public String imports(){

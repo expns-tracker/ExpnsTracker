@@ -43,26 +43,26 @@
 
                 <p class="flow-text grey-text text-darken-1" style="font-size: 1.1rem;">Manage your expenses securely.</p>
 
-                <div style="margin-top: 20px;">
-                    <a th:href="@{/tink/connect}" class="btn waves-effect waves-light blue darken-1" style="width: 100%; max-width: 200px; margin-bottom: 10px;">
-                        <i class="material-icons left">link</i>Connect Bank
-                    </a>
+<!--                <div style="margin-top: 20px;">-->
+<!--                    <a th:href="@{/tink/connect}" class="btn waves-effect waves-light blue darken-1" style="width: 100%; max-width: 200px; margin-bottom: 10px;">-->
+<!--                        <i class="material-icons left">link</i>Connect Bank-->
+<!--                    </a>-->
 
-                    <a th:if="${currentUser.syncStatus != 'RUNNING'}"
-                       th:href="@{/tink/load-transactions}"
-                       class="btn waves-effect waves-light green darken-1" style="width: 100%; max-width: 200px; margin-bottom: 10px;">
-                        <i class="material-icons left">sync</i>Sync Now
-                    </a>
+<!--                    <a th:if="${currentUser.syncStatus != 'RUNNING'}"-->
+<!--                       th:href="@{/tink/load-transactions}"-->
+<!--                       class="btn waves-effect waves-light green darken-1" style="width: 100%; max-width: 200px; margin-bottom: 10px;">-->
+<!--                        <i class="material-icons left">sync</i>Sync Now-->
+<!--                    </a>-->
 
-                    <button th:if="${currentUser.syncStatus == 'RUNNING'}" class="btn disabled" style="width: 100%; max-width: 200px; margin-bottom: 10px;">
-                        <i class="material-icons left">hourglass_empty</i>Syncing...
-                    </button>
-                </div>
+<!--                    <button th:if="${currentUser.syncStatus == 'RUNNING'}" class="btn disabled" style="width: 100%; max-width: 200px; margin-bottom: 10px;">-->
+<!--                        <i class="material-icons left">hourglass_empty</i>Syncing...-->
+<!--                    </button>-->
+<!--                </div>-->
             </div>
         </div>
 
         <!-- Dashboard Stats -->
-        <div class="row" style="margin-top: 30px;" th:if="${currentUser != null}">
+        <div class="row"  th:if="${currentUser != null}">
 
             <!-- 1. Current Balance -->
             <div class="col s12">

@@ -62,6 +62,7 @@ public class AuthService {
                 .id(uid)
                 .email(email)
                 .profileCompleted(false)
+                .notifBudget(true)
                 .build();
 
         userRepository.save(user);

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
+<head>
+    <title>My Profile</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div class="container" style="margin-top: 40px;">
+        <div class="row">
+            <div class="col s12 m8 offset-m2 l6 offset-l3">
+
+                <!-- Profile Edit Card -->
+                <div class="card hoverable z-depth-1">
+                    <div class="card-content">
+                        <span class="card-title center blue-text text-darken-2">
+                            Edit Profile
+                        </span>
+
+                        <div class="center-align" style="margin: 20px 0;">
+                            <img th:if="${currentUser.firstName}"
+                                 th:src="|https://ui-avatars.com/api/?name=${currentUser.firstName}+${currentUser.lastName}&background=0D8ABC&color=fff&size=128|"
+                                 alt="Profile"
+                                 class="circle responsive-img z-depth-1">
+                        </div>
+
+                        <form th:action="@{/profile/update}" th:object="${currentUser}" method="post">
+
+                            <input type="hidden" th:field="*{id}" />
+
+                            <div class="input-field">
+                                <i class="material-icons prefix grey-text">person</i>
+                                <input id="firstName" type="text" th:field="*{firstName}" required class="validate">
+                                <label for="firstName">First Name</label>
+                            </div>
+
+                            <div class="input-field">
+                                <i class="material-icons prefix grey-text">person_outline</i>
+                                <input id="lastName" type="text" th:field="*{lastName}" required class="validate">
+                                <label for="lastName">Last Name</label>
+                            </div>
+
+                            <div class="input-field">
+                                <i class="material-icons prefix grey-text">email</i>
+                                <!-- Email is usually immutable in simple apps, so readonly -->
+                                <input id="email" type="email" th:field="*{email}" readonly disabled class="grey-text">
+                                <label for="email">Email (Cannot be changed)</label>
+                            </div>
+
+                            <div class="card-action center-align" style="border-top: none; padding-top: 20px;">
+                                <button class="btn waves-effect waves-light blue darken-1" type="submit">
+                                    Update Profile
+                                    <i class="material-icons right">save</i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card blue lighten-5" style="margin-top: 30px;">
+                    <div class="card-content">
+                        <span class="card-title blue-text text-darken-4" style="font-size: 1.2rem; font-weight: bold;">
+                            <i class="material-icons left">link</i> Connect to your Bank Account
+                        </span>
+                        <p class="blue-text text-darken-3">
+                            Click here to connect to your bank account for easy access to your daily transactions.
+                        </p>
+                        <br>
+                        <div class="right-align">
+                            <a th:href="@{/tink/connect}" class="btn waves-effect waves-light blue darken-3">
+                                <i class="material-icons left">link</i>Connect
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="card yellow lighten-5" style="margin-top: 30px;">
+                    <div class="card-content">
+                        <span class="card-title yellow-text text-darken-4" style="font-size: 1.2rem; font-weight: bold;">
+                            <i class="material-icons left">settings</i> Settings
+                        </span>
+                        <p class="yellow-text text-darken-3">
+                            Go to settings to update your <b>monthly budget limit</b> and other information.
+                        </p>
+                        <br>
+                        <div class="right-align">
+
+                            <a th:href="@{/profile/settings}" class="btn waves-effect waves-light yellow darken-3">
+                                <i class="material-icons left">settings</i>Settings
+                            </a>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

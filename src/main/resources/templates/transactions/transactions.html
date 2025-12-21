@@ -20,7 +20,18 @@
                         <!-- Top Actions Bar -->
                         <div class="row valign-wrapper" style="margin-bottom: 20px;">
 
+
                             <div class="col s6 right-align">
+                                <a th:if="${currentUser.syncStatus != 'RUNNING'}"
+                                   th:href="@{/tink/load-transactions}"
+                                   class="btn waves-effect waves-light green darken-1" style="width: 100%; max-width: 200px; margin-bottom: 10px;">
+                                    <i class="material-icons left">sync</i>Sync Transactions
+                                </a>
+
+                                <button th:if="${currentUser.syncStatus == 'RUNNING'}" class="btn disabled" style="width: 100%; max-width: 200px; margin-bottom: 10px;">
+                                    <i class="material-icons left">hourglass_empty</i>Syncing...
+                                </button>
+
                                 <a th:href="@{/transactions/new}" class="btn waves-effect waves-light blue darken-1">
                                     <i class="material-icons left">add</i>New Transaction
                                 </a>
