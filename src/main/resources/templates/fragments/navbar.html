@@ -31,6 +31,12 @@
         <li>
             <a href="#" onclick="toggleDarkMode()"><i class="material-icons">dark_mode</i>Dark Mode</a>
         </li>
+        <li th:if="${currentUser != null}">
+            <a href="/feedback">
+                <i class="material-icons left">feedback</i>Feedback
+            </a>
+        </li>
+
         <!-- ADMIN MODE -->
         <li th:if="${currentUser != null}">
             <a href="/admin/dashboard">
@@ -55,6 +61,12 @@
 
         <li th:if="${currentUser != null}"><a href="/profile"><i class="material-icons">person</i>Profile</a></li>
         <li th:if="${currentUser != null}"><a href="/profile/settings"><i class="material-icons">settings</i>Settings</a></li>
+        <li th:if="${currentUser != null}">
+            <a href="/feedback">
+                <i class="material-icons left">feedback</i>Feedback
+            </a>
+        </li>
+
         <li class="divider"></li>
         <li>
             <a href="#" onclick="toggleDarkMode()"><i class="material-icons">dark_mode</i>Dark Mode</a>

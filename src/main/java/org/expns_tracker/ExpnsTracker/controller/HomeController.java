@@ -35,16 +35,6 @@ public class HomeController {
         return "index";
     }
 
-    @GetMapping("/new")
-    public String New(){
-        return "new";
-    }
-
-    @GetMapping("/import")
-    public String imports(){
-        return "import";
-    }
-
     @GetMapping("/register")
     public String register(){
 
