@@ -31,6 +31,13 @@
         <li>
             <a href="#" onclick="toggleDarkMode()"><i class="material-icons">dark_mode</i>Dark Mode</a>
         </li>
+        <!-- ADMIN MODE -->
+        <li th:if="${currentUser != null}">
+            <a href="/admin/dashboard">
+                <i class="material-icons left">admin_panel_settings</i>
+                Admin Mode
+            </a>
+        </li>
         <li class="divider"></li>
         <li>
             <a th:href="@{/logout}" class="red-text" >
@@ -53,6 +60,13 @@
             <a href="#" onclick="toggleDarkMode()"><i class="material-icons">dark_mode</i>Dark Mode</a>
         </li>
         <li class="divider"></li>
+        <!-- ADMIN MODE -->
+        <li th:if="${currentUser != null}">
+            <a href="/admin/dashboard">
+                <i class="material-icons left">admin_panel_settings</i>
+                Admin Mode
+            </a>
+        </li>
         <li th:if="${currentUser != null}">
             <a th:href="@{/logout}" class="red-text" >
                 <i class="material-icons left">logout</i>Logout

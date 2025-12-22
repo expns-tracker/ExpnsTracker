@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
+
+<head>
+    <title>Feedback Details</title>
+
+    <style>
+        .feedback-bg {
+            background: linear-gradient(135deg, #ffebee, #ffcdd2);
+            min-height: 100vh;
+            padding-bottom: 40px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div layout:fragment="content" class="feedback-bg">
+    <div class="container" >
+
+        <!-- HEADER -->
+        <div class="row">
+            <div class="col s12">
+                <h4 class="red-text text-darken-3">
+                    <i class="material-icons left">chat</i>
+                    Feedback Details
+                </h4>
+            </div>
+        </div>
+
+        <!-- FEEDBACK CARD -->
+        <div class="row">
+            <div class="col s12 m10 offset-m1 l8 offset-l2">
+                <div class="card hoverable">
+                    <div class="card-content">
+
+                        <span class="card-title red-text text-darken-2">
+                            From: <span th:text="${feedback.userEmail}">user@example.com</span>
+                        </span>
+
+                        <p>
+                            <strong>Category:</strong>
+                            <span class="new badge red lighten-2"
+                                  th:text="${feedback.category}"
+                                  data-badge-caption="">
+                            </span>
+                        </p>
+
+                        <p>
+                            <strong>Submitted:</strong>
+                            <span th:text="${feedback.createdAt}">05 Jun 2025</span>
+                        </p>
+
+                        <div class="divider" style="margin: 20px 0;"></div>
+
+                        <p>
+                            <strong>Message:</strong>
+                        </p>
+                        <blockquote th:text="${feedback.message}">
+                            Feedback message goes here...
+                        </blockquote>
+
+                        <!-- RESPONSE FORM -->
+                        <form th:action="@{/admin/feedback/respond}" method="post">
+                            <input type="hidden" name="id" th:value="${feedback.id}"/>
+
+                            <div class="input-field">
+                                <i class="material-icons prefix red-text">reply</i>
+                                <textarea id="response"
+                                          name="response"
+                                          class="materialize-textarea"
+                                          required></textarea>
+                                <label for="response">Admin Response</label>
+                            </div>
+
+                            <div class="card-action center-align">
+                                <button type="submit"
+                                        class="btn red darken-1 waves-effect waves-light">
+                                    Send Response
+                                    <i class="material-icons right">send</i>
+                                </button>
+
+                                <br><br>
+
+                                <a th:href="@{/admin/dashboard}" class="grey-text">
+                                    ← Back to Dashboard
+                                </a>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

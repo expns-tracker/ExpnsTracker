@@ -40,12 +40,6 @@ public class HomeController {
         return "new";
     }
 
-    @GetMapping("/admin")
-    public String admin(){
-        return "admin";
-    }
-
-
     @GetMapping("/import")
     public String imports(){
         return "import";
