@@ -41,6 +41,10 @@
                                 <i class="material-icons suffix toggle-password" style="cursor: pointer;" onclick="togglePassword('password', this)">visibility</i>
                             </div>
 
+                            <div class="right-align" style="margin-bottom: 20px;">
+                                <a href="#forgotPasswordModal" class="modal-trigger blue-text text-darken-2" style="font-size: 0.9rem;">Forgot Password?</a>
+                            </div>
+
                             <div class="center-align" style="margin-top: 20px;">
                                 <button class="btn waves-effect waves-light blue darken-1" style="width: 100%;" type="submit">
                                     Log In
@@ -67,22 +71,32 @@
             </div>
         </div>
     </div>
+    <div id="forgotPasswordModal" class="modal">
+        <div class="modal-content">
+            <h5 class="blue-text text-darken-2">Reset Password</h5>
+            <p>Enter your email address and we'll send you a link to reset your password.</p>
+            <div class="input-field">
+                <i class="material-icons prefix">email</i>
+                <input id="resetEmail" type="email" class="validate">
+                <label for="resetEmail">Email Address</label>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class="modal-close waves-effect waves-grey btn-flat">Cancel</a>
+            <a href="#!" onclick="sendResetEmail()" class="waves-effect waves-light btn blue darken-1">Send Link</a>
+        </div>
+    </div>
     <script type="module" th:src="@{/js/login.js}"></script>
+    <script layout:fragment="script">
+        document.addEventListener('DOMContentLoaded', function() {
+            var modals = document.querySelectorAll('.modal');
+            M.Modal.init(modals);
+        });
+    </script>
 </div>
 
 <!-- Page Specific Scripts -->
-<script layout:fragment="script">
-    function togglePassword(id, icon) {
-        const input = document.getElementById(id);
-        if (input.type === "password") {
-            input.type = "text";
-            icon.textContent = "visibility_off";
-        } else {
-            input.type = "password";
-            icon.textContent = "visibility";
-        }
-    }
-</script>
+
 
 
 

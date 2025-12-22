@@ -1,6 +1,6 @@
 import {app} from "/js/firebase/firebase-config.js";
 import {getAuth, signInWithEmailAndPassword, GoogleAuthProvider ,
-    signInWithPopup } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
+    signInWithPopup, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
 
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
@@ -29,6 +29,38 @@ function formatFirebaseError(error) {
         default:
             return "An unknown error occurred.";
     }
+}
+
+window.sendResetEmail = function() {
+    const email = document.getElementById('resetEmail').value;
+
+    if (!email) {
+        M.toast({html: 'Please enter your email address', classes: 'red rounded'});
+        return;
+    }
+
+    sendPasswordResetEmail(auth, email)
+        .then(() => {
+            M.toast({html: 'Password reset email sent!', classes: 'green rounded'});
+            // Close modal
+            const elem = document.getElementById('forgotPasswordModal');
+            const instance = M.Modal.getInstance(elem);
+            instance.close();
+        })
+        .catch((error) => {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            console.error("Error sending reset email:", errorCode, errorMessage);
+
+            let displayError = "Failed to send reset email.";
+            if (errorCode === 'auth/user-not-found') {
+                displayError = "No account found with this email.";
+            } else if (errorCode === 'auth/invalid-email') {
+                displayError = "Invalid email format.";
+            }
+
+            M.toast({html: displayError, classes: 'red rounded'});
+        });
 }
 
 window.togglePassword = togglePassword;
