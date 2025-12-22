@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
+<head>
+    <title>Admin Dashboard</title>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .admin-background {
+            background: linear-gradient(135deg, #ffebee, #ffcdd2);
+            min-height: 100vh;
+            padding-bottom: 50px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div layout:fragment="content" class="admin-background">
+    <div class="container" >
+
+        <!-- HEADER -->
+        <div class="row">
+            <div class="col s12">
+                <h4 class="red-text text-darken-3">
+                    <i class="material-icons left">admin_panel_settings</i>
+                    Admin Dashboard
+                </h4>
+            </div>
+        </div>
+
+        <!-- STATS -->
+        <div class="row">
+            <div class="col s12 m6 l3">
+                <div class="card hoverable red lighten-4 center-align">
+                    <div class="card-content">
+                        <i class="material-icons red-text large">trending_up</i>
+                        <h6>Account Activations</h6>
+                        <h5>1,440</h5>
+                    </div>
+                </div>
+            </div>
+            <div class="col s12 m6 l3">
+                <div class="card hoverable red lighten-3 center-align">
+                    <div class="card-content">
+                        <i class="material-icons red-text large">person_off</i>
+                        <h6>Deactivated</h6>
+                        <h5>234</h5>
+                    </div>
+                </div>
+            </div>
+            <div class="col s12 m6 l3">
+                <div class="card hoverable red lighten-2 center-align">
+                    <div class="card-content">
+                        <i class="material-icons red-text large">feedback</i>
+                        <h6>Feedback Responses</h6>
+                        <h5>333</h5>
+                    </div>
+                </div>
+            </div>
+            <div class="col s12 m6 l3">
+                <div class="card hoverable red darken-1 white-text center-align">
+                    <div class="card-content">
+                        <i class="material-icons white-text large">check_circle</i>
+                        <h6>Cases Solved</h6>
+                        <h5>128</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CHARTS -->
+<!--        <div class="row">-->
+<!--            <div class="col s12 l6">-->
+<!--                <div class="card hoverable">-->
+<!--                    <div class="card-content">-->
+<!--                        <span class="card-title red-text">Account Activations</span>-->
+<!--                        <canvas id="activationChart"></canvas>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="col s12 l6">-->
+<!--                <div class="card hoverable">-->
+<!--                    <div class="card-content">-->
+<!--                        <span class="card-title red-text">Feedback Responses</span>-->
+<!--                        <canvas id="feedbackChart"></canvas>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+
+        <!-- FILTERS -->
+        <div class="card hoverable">
+            <div class="card-content">
+                <span class="card-title red-text">Filters</span>
+                <form method="get">
+                    <div class="row">
+                        <div class="input-field col s4">
+                            <select name="category">
+                                <option value="">All Categories</option>
+                                <option>Bug</option>
+                                <option>Feature</option>
+                                <option>UX</option>
+                            </select>
+                            <label>Category</label>
+                        </div>
+                        <div class="input-field col s4">
+                            <select name="status">
+                                <option value="">All Status</option>
+                                <option>OPEN</option>
+                                <option>RESPONDED</option>
+                            </select>
+                            <label>Status</label>
+                        </div>
+                        <div class="col s4" style="margin-top:25px;">
+                            <button class="btn red darken-1">Apply</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ACCOUNT REQUESTS -->
+        <div class="card hoverable">
+            <div class="card-content">
+                <span class="card-title red-text">
+                    <i class="material-icons left">how_to_reg</i>
+                    Activation / Deactivation Requests
+                </span>
+
+                <table class="highlight responsive-table">
+                    <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Type</th>
+                        <th>Reason</th>
+                        <th>Date</th>
+                        <th class="center-align">Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>alex@example.com</td>
+                        <td><span class="new badge red">Activation</span></td>
+                        <td>Email verification</td>
+                        <td>06 Jun 2025</td>
+                        <td class="center-align">
+                            <a href="/admin/accounts/verify/1"
+                               class="btn-small red darken-1 waves-effect">
+                                Review
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- CURRENT FEEDBACK -->
+        <div class="card hoverable">
+            <div class="card-content">
+                <span class="card-title red-text">
+                    <i class="material-icons left">priority_high</i>
+                    Current Feedback
+                </span>
+
+                <table class="highlight responsive-table">
+                    <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Category</th>
+                        <th>Message</th>
+                        <th>Date</th>
+                        <th class="center-align">Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>john@example.com</td>
+                        <td><span class="new badge red">Bug</span></td>
+                        <td>Crash on submit</td>
+                        <td>05 Jun 2025</td>
+                        <td class="center-align">
+                            <a href="/admin/feedback/1" class="btn-small red darken-1">Respond</a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- FEEDBACK HISTORY -->
+        <div class="card hoverable">
+            <div class="card-content">
+                <span class="card-title red-text">
+                    <i class="material-icons left">history</i>
+                    Feedback History
+                </span>
+
+                <table class="highlight responsive-table">
+                    <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Category</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th class="center-align">View</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>mark@example.com</td>
+                        <td><span class="new badge red lighten-2">UX</span></td>
+                        <td><span class="new badge green">Responded</span></td>
+                        <td>01 Jun 2025</td>
+                        <td class="center-align">
+                            <a href="/admin/feedback/3" class="btn-flat red-text">
+                                <i class="material-icons">visibility</i>
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <!-- PAGINATION -->
+                <ul class="pagination center-align">
+                    <li class="disabled"><a href="#"><i class="material-icons">chevron_left</i></a></li>
+                    <li class="active red"><a href="#">1</a></li>
+                    <li class="waves-effect"><a href="#">2</a></li>
+                    <li class="waves-effect"><a href="#"><i class="material-icons">chevron_right</i></a></li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- CHARTS (FIXED & SAFE) -->
+<script layout:fragment="script" th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const activationCtx = document.getElementById('activationChart');
+        const feedbackCtx = document.getElementById('feedbackChart');
+
+        if (activationCtx instanceof HTMLCanvasElement) {
+            new Chart(activationCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan','Feb','Mar','Apr','May','Jun'],
+                    datasets: [{
+                        label: 'Account Activations',
+                        data: [180, 210, 235, 260, 285, 270],
+                        borderColor: '#b71c1c',
+                        backgroundColor: 'rgba(183,28,28,.25)',
+                        fill: true,
+                        tension: .4
+                    }]
+                }
+            });
+        }
+
+        if (feedbackCtx instanceof HTMLCanvasElement) {
+            new Chart(feedbackCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Jan','Feb','Mar','Apr','May','Jun'],
+                    datasets: [{
+                        label: 'Feedback Responses',
+                        data: [35,48,52,61,70,67],
+                        backgroundColor: '#d32f2f'
+                    }]
+                }
+            });
+        }
+    });
+</script>
+
+</body>
+</html>

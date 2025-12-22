@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
+
+<head>
+    <title>Feedback</title>
+</head>
+
+<body>
+
+<div layout:fragment="content">
+    <div class="container" style="margin-top:40px;">
+
+        <!-- HEADER -->
+        <div class="row">
+            <div class="col s12">
+                <h4 class="blue-text text-darken-2">
+                    <i class="material-icons left">feedback</i>
+                    Feedback
+                </h4>
+            </div>
+        </div>
+
+        <!-- FEEDBACK SUBMISSION -->
+        <div class="row">
+            <div class="col s12 m8 offset-m2 l6 offset-l3">
+                <div class="card hoverable z-depth-2">
+                    <div class="card-content">
+
+                        <span class="card-title center blue-text text-darken-2">
+                            Send Feedback
+                        </span>
+
+                        <form th:action="@{/feedback}" method="post" style="margin-top: 30px;">
+
+                            <div class="input-field">
+                                <i class="material-icons prefix grey-text">category</i>
+                                <select name="category" required>
+                                    <option value="" disabled selected>Choose category</option>
+                                    <option>Bug</option>
+                                    <option>Feature</option>
+                                    <option>UX</option>
+                                    <option>Performance</option>
+                                </select>
+                                <label>Category</label>
+                            </div>
+
+                            <div class="input-field">
+                                <i class="material-icons prefix grey-text">edit</i>
+                                <textarea name="message"
+                                          class="materialize-textarea"
+                                          required></textarea>
+                                <label>Your feedback</label>
+                            </div>
+
+                            <div class="card-action center-align"
+                                 style="border-top:none; padding-top:20px;">
+                                <button class="btn-large blue darken-1 waves-effect waves-light">
+                                    Submit
+                                    <i class="material-icons right">send</i>
+                                </button>
+                            </div>
+
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FEEDBACK HISTORY -->
+        <div class="row">
+            <div class="col s12">
+                <div class="card hoverable">
+                    <div class="card-content">
+
+                        <span class="card-title blue-text text-darken-2">
+                            <i class="material-icons left">history</i>
+                            Your Feedback
+                        </span>
+
+                        <table class="highlight responsive-table">
+                            <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Message</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th class="center-align">Chat</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+
+                            <tr th:each="fb : ${feedbackList}">
+                                <td>
+                                    <span class="new badge blue"
+                                          th:text="${fb.category}"
+                                          data-badge-caption=""></span>
+                                </td>
+                                <td th:text="${fb.message}">App crashes</td>
+                                <td>
+                                    <span class="new badge orange"
+                                          th:if="${fb.status == 'OPEN'}">Open</span>
+                                    <span class="new badge green"
+                                          th:if="${fb.status == 'RESPONDED'}">Responded</span>
+                                </td>
+                                <td th:text="${fb.date}">05 Jun 2025</td>
+                                <td class="center-align">
+                                    <a th:href="@{/feedback/{id}(id=${fb.id})}"
+                                       class="btn-small blue darken-1">
+                                        View
+                                    </a>
+                                </td>
+                            </tr>
+
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>
