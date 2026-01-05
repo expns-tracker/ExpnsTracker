@@ -9,6 +9,7 @@ import net.javacrumbs.shedlock.core.SimpleLock;
 import org.expns_tracker.ExpnsTracker.entity.User;
 import org.expns_tracker.ExpnsTracker.repository.UserRepository;
 import org.expns_tracker.ExpnsTracker.service.TinkService;
+import org.expns_tracker.ExpnsTracker.service.UserService;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,6 +35,9 @@ public class TinkSchedulerTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private UserService userService;
 
     @Mock
     private TinkService tinkService;
@@ -72,6 +76,7 @@ public class TinkSchedulerTest {
         ObjectNode rootNode = getTransactions();
 
         for (User user : users) {
+            lenient().when(userService.getUser(user.getId())).thenReturn(user);
             lenient().when(tinkService.getUserAccessCode(user.getTinkUserId())).thenReturn("code-"+user.getId());
             lenient().when(tinkService.getAccessToken("code-"+user.getId())).thenReturn("token-"+user.getId());
             lenient().when(tinkService.fetchTransactions("token-"+user.getId(), null)).thenReturn(rootNode);
