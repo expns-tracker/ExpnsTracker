@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor
 public class LocalCategorizer {
 
-    private final Map<Pattern, String> rules = new HashMap<>();
+    private final Map<Pattern, String> rules = new LinkedHashMap<>();
 
     private static final String DEFAULT_CATEGORY_ID = "99dd6d0c05a347d1858daa219e21c573";
 
@@ -26,6 +26,12 @@ public class LocalCategorizer {
     }
 
     private void loadRules() {
+
+        // --- INCOME: Income (ID: 0d5ab7626aa746ffb638a862aa1a386a) ---
+        String incomeId = "0d5ab7626aa746ffb638a862aa1a386a";
+        addRule("salary|wages|dividend", incomeId);
+        addRule("deposit|refund", incomeId);
+
         // --- EXPENSES: Food & Drinks (ID: 47ea44117c6543178b3fefae8ffada52) ---
         String foodId = "47ea44117c6543178b3fefae8ffada52";
         addRule("starbucks|costa|pret|mcdonalds|burger king|kfc|subway|dominos|pizza", foodId);
@@ -56,20 +62,12 @@ public class LocalCategorizer {
         addRule("netflix|spotify|disney|prime video|hulu|hbo", leisureId);
         addRule("steam|playstation|xbox|nintendo", leisureId);
         addRule("cinema|theater|concert|ticketmaster", leisureId);
-
-        // --- INCOME: Income (ID: 0d5ab7626aa746ffb638a862aa1a386a) ---
-        String incomeId = "0d5ab7626aa746ffb638a862aa1a386a";
-        addRule("salary|wages|dividend", incomeId);
-        addRule("deposit|refund", incomeId);
     }
 
     private void addRule(String regex, String categoryId) {
-        rules.put(Pattern.compile("(?i).*" + regex + ".*"), categoryId);
+        rules.put(Pattern.compile("(?i).*\\b(" + regex + ")\\b.*"), categoryId);
     }
 
-    /**
-     * Returns the Category ID for the given transaction description.
-     */
     public String categorize(String description, Double amount) {
         if (description == null) return DEFAULT_CATEGORY_ID;
 

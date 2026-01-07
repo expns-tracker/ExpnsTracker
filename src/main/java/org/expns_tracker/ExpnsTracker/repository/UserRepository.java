@@ -3,6 +3,7 @@ package org.expns_tracker.ExpnsTracker.repository;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.expns_tracker.ExpnsTracker.entity.User;
 import org.springframework.stereotype.Repository;
 
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Repository
 @RequiredArgsConstructor
 public class UserRepository {
@@ -19,6 +21,7 @@ public class UserRepository {
     private final String COLLECTION_NAME = "users";
 
     public User save(User user){
+        log.info("Saving user {}", user);
         DocumentReference docRef;
 
         if (user.getId() == null) {

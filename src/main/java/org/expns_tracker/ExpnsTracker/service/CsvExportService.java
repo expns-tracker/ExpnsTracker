@@ -86,7 +86,7 @@ public class CsvExportService {
                 log.info("Found {} transactions to export.", transactions.size());
 
                 String csvContent = generateCsv(transactions);
-                Thread.sleep(20000);
+
                 String fileName = "transactions_" + System.currentTimeMillis() + ".csv";
                 Path filePath = userDir.resolve(fileName);
 

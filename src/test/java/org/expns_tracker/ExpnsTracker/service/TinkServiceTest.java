@@ -126,7 +126,6 @@ class TinkServiceTest {
         mockWebServer.enqueue(new MockResponse()
                 .addHeader("Content-Type", "application/json"));
 
-        // Execute
         RuntimeException exception = assertThrows(
                 RuntimeException.class, () -> tinkService.generateTinkLinkUrl("tink-user-id")
         );
@@ -260,5 +259,86 @@ class TinkServiceTest {
         assertEquals("/api/v1/credentials/list", request.getPath());
         assertEquals("Bearer valid-token", request.getHeader("Authorization"));
         assertEquals("GET", request.getMethod());
+    }
+
+    @Test
+    void getClientAppToken_Success() throws InterruptedException {
+
+        mockWebServer.enqueue(new MockResponse()
+                .setBody("{\"access_token\": \"standalone-client-token\", \"expires_in\": 1800}")
+                .addHeader("Content-Type", "application/json"));
+
+
+        String token = tinkService.getClientAppToken();
+
+
+        assertEquals("standalone-client-token", token);
+
+
+        RecordedRequest request = mockWebServer.takeRequest();
+        assertEquals("/api/v1/oauth/token", request.getPath());
+        assertEquals("POST", request.getMethod());
+
+        String body = request.getBody().readUtf8();
+        assertTrue(body.contains("grant_type=client_credentials"));
+        assertTrue(body.contains("client_id=test-client-id"));
+        assertTrue(body.contains("scope=user%3Acreate+user%3Adelete+authorization%3Agrant")); // URL encoded spaces
+    }
+
+    @Test
+    void getClientAppToken_Failure() {
+
+        mockWebServer.enqueue(new MockResponse()
+                .setBody("{}")
+                .addHeader("Content-Type", "application/json"));
+
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            tinkService.getClientAppToken();
+        });
+
+        assertEquals("Failed to get client access token", exception.getMessage());
+    }
+
+    @Test
+    void loadCategories_Success() throws InterruptedException {
+
+        String mockResponse = """
+            [
+                {
+                    "code": "expenses:food",
+                    "id": "food_123",
+                    "parent": "expenses_root"
+                },
+                {
+                    "code": "expenses:housing",
+                    "id": "housing_456",
+                    "parent": "expenses_root"
+                }
+            ]
+            """;
+
+        mockWebServer.enqueue(new MockResponse()
+                .setBody(mockResponse)
+                .addHeader("Content-Type", "application/json"));
+
+        tinkService.loadCategories();
+
+        assertEquals("expenses_root", tinkService.getCategoryParent("food_123"));
+        assertEquals("expenses_root", tinkService.getCategoryParent("housing_456"));
+        assertNull(tinkService.getCategoryParent("unknown_id"));
+
+        RecordedRequest request = mockWebServer.takeRequest();
+        assertEquals("/api/v1/categories", request.getPath());
+        assertEquals("GET", request.getMethod());
+    }
+
+    @Test
+    void loadCategories_Failure_HandledGracefully() {
+        mockWebServer.enqueue(new MockResponse().setResponseCode(500));
+
+        assertDoesNotThrow(() -> tinkService.loadCategories());
+
+        assertNull(tinkService.getCategoryParent("food_123"));
     }
 }
