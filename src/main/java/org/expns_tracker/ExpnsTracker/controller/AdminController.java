@@ -3,17 +3,16 @@ package org.expns_tracker.ExpnsTracker.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.expns_tracker.ExpnsTracker.config.ApplicationProperties;
+import org.expns_tracker.ExpnsTracker.entity.Feedback;
 import org.expns_tracker.ExpnsTracker.entity.User;
 import org.expns_tracker.ExpnsTracker.entity.enums.Role;
+import org.expns_tracker.ExpnsTracker.service.FeedbackService;
 import org.expns_tracker.ExpnsTracker.service.UserService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
@@ -28,6 +27,7 @@ public class AdminController {
 
     private final UserService userService;
     private final ApplicationProperties applicationProperties;
+    private final FeedbackService feedbackService;
 
     @GetMapping
     public String adminDashboard(Model model, @RequestParam(required = false) String query) {
@@ -103,5 +103,38 @@ public class AdminController {
             ra.addFlashAttribute("errorMessage", "Failed to revoke admin role.");
         }
         return "redirect:/admin";
+    }
+
+    @GetMapping("/feedbacks")
+    public String listFeedbacks(Model model,
+                                @RequestParam(defaultValue = "0") int page,
+                                @RequestParam(required = false) String status,
+                                @RequestParam(required = false) String category) {
+        int pageSize = 10;
+
+        List<Feedback> feedbacks = feedbackService.getFeedbacksPage(page, pageSize, status, category);
+
+        long totalItems = feedbackService.getTotalCount(status);
+        int totalPages = (int) Math.ceil((double) totalItems / pageSize);
+
+        model.addAttribute("feedbacks", feedbacks);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("currentStatus", status);
+        model.addAttribute("currentCategory", category);
+        model.addAttribute("activePage", "admin");
+
+        return "admin/admin-feedback";
+    }
+
+    @PostMapping("/feedbacks/resolve/{id}")
+    public String resolveFeedback(@PathVariable String id, RedirectAttributes ra) {
+        try {
+            feedbackService.markAsResolved(id);
+            ra.addFlashAttribute("successMessage", "Feedback marked as resolved.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMessage", "Error updating feedback.");
+        }
+        return "redirect:/admin/feedbacks";
     }
 }

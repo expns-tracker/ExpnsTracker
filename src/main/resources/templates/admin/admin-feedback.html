@@ -2,102 +2,136 @@
 <html lang="en"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{fragments/layout}">
-
+      layout:decorate="~{fragments/admin_layout}">
 <head>
-    <title>Feedback Details</title>
-
+    <title>Manage Feedback</title>
     <style>
-        .feedback-bg {
-            background: linear-gradient(135deg, #ffebee, #ffcdd2);
-            min-height: 100vh;
-            padding-bottom: 40px;
+        .stat-card {
+            border-radius: 8px;
         }
     </style>
 </head>
-
 <body>
 
-<div layout:fragment="content" class="feedback-bg">
-    <div class="container" >
-
-        <!-- HEADER -->
-        <div class="row">
-            <div class="col s12">
-                <h4 class="red-text text-darken-3">
-                    <i class="material-icons left">chat</i>
-                    Feedback Details
-                </h4>
-            </div>
-        </div>
-
-        <!-- FEEDBACK CARD -->
-        <div class="row">
-            <div class="col s12 m10 offset-m1 l8 offset-l2">
-                <div class="card hoverable">
-                    <div class="card-content">
-
+<div layout:fragment="content">
+    <div class="admin-background" style="padding-top: 30px;">
+        <div class="container" style="margin-top: 40px;">
+            <div class="row">
+                <div class="col s12">
+                    <div class="card hoverable">
+                        <div class="card-content">
                         <span class="card-title red-text text-darken-2">
-                            From: <span th:text="${feedback.userEmail}">user@example.com</span>
+                            <i class="material-icons left">feedback</i> User Feedback
                         </span>
 
-                        <p>
-                            <strong>Category:</strong>
-                            <span class="new badge red lighten-2"
-                                  th:text="${feedback.category}"
-                                  data-badge-caption="">
-                            </span>
-                        </p>
+                            <!-- Filter Form -->
+                            <form th:action="@{/admin/feedbacks}" method="get" class="row valign-wrapper" style="margin-top: 20px;">
+                                <div class="input-field col s12">
+                                    <select name="status" onchange="this.form.submit()">
+                                        <option value="" th:selected="${currentStatus == null}">All Statuses</option>
+                                        <option value="OPEN" th:selected="${currentStatus == 'OPEN'}">Open</option>
+                                        <option value="RESOLVED" th:selected="${currentStatus == 'RESOLVED'}">Resolved</option>
+                                    </select>
+                                    <label>Filter by Status</label>
+                                </div>
+                                <div class="input-field col s12">
+                                    <select name="category" onchange="this.form.submit()">
+                                        <option value="" th:selected="${currentCategory == null}">All Categories</option>
+                                        <option value="BUG" th:selected="${currentCategory == 'BUG'}">Bug</option>
+                                        <option value="FEATURE" th:selected="${currentCategory == 'FEATURE'}">Feature</option>
+                                        <option value="UX" th:selected="${currentCategory == 'UX'}">UX</option>
+                                        <option value="OTHER" th:selected="${currentCategory == 'OTHER'}">Other</option>
+                                    </select>
+                                    <label>Filter by Category</label>
+                                </div>
+                            </form>
 
-                        <p>
-                            <strong>Submitted:</strong>
-                            <span th:text="${feedback.createdAt}">05 Jun 2025</span>
-                        </p>
+                            <!-- Feedback Table -->
+                            <table class="highlight responsive-table">
+                                <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>User</th>
+                                    <th>Category</th>
+                                    <th>Message</th>
+                                    <th>Status</th>
+                                    <th class="center-align">Action</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="fb : ${feedbacks}">
+                                    <td th:text="${#dates.format(fb.createdAt.toDate(), 'dd MMM yyyy')}">01 Jan</td>
+                                    <td th:text="${fb.userEmail}">user@test.com</td>
+                                    <td>
+                                        <span class="chip" th:text="${fb.category}">BUG</span>
+                                    </td>
+                                    <td th:text="${fb.message}" style="max-width: 300px;" class="truncate">Issue...</td>
+                                    <td>
+                                        <!-- Check enum name() for string comparison -->
+                                        <span class="new badge" data-badge-caption=""
+                                              th:classappend="${fb.status.name() == 'RESOLVED'} ? 'green' : 'orange'"
+                                              th:text="${fb.status}">OPEN</span>
+                                    </td>
+                                    <td class="center-align">
+                                        <form th:if="${fb.status.name() != 'RESOLVED'}"
+                                              th:action="@{/admin/feedbacks/resolve/{id}(id=${fb.id})}"
+                                              method="post">
+                                            <button type="submit" class="btn-small green waves-effect waves-light tooltipped"
+                                                    data-position="top" data-tooltip="Mark as Resolved">
+                                                <i class="material-icons">check</i>
+                                            </button>
+                                        </form>
+                                        <button th:if="${fb.status.name() == 'RESOLVED'}" class="btn-flat disabled">
+                                            <i class="material-icons grey-text">done_all</i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(feedbacks)}">
+                                    <td colspan="6" class="center-align grey-text">No feedback found.</td>
+                                </tr>
+                                </tbody>
+                            </table>
 
-                        <div class="divider" style="margin: 20px 0;"></div>
+                            <!-- Pagination -->
+                            <ul class="pagination center-align" th:if="${totalPages > 1}" style="margin-top: 30px;">
+                                <li th:classappend="${currentPage == 0} ? 'disabled'">
+                                    <!-- Include status param in link -->
+                                    <a th:href="${currentPage > 0} ? @{/admin/feedbacks(page=${currentPage - 1}, status=${currentStatus})} : '#'">
+                                        <i class="material-icons">chevron_left</i>
+                                    </a>
+                                </li>
 
-                        <p>
-                            <strong>Message:</strong>
-                        </p>
-                        <blockquote th:text="${feedback.message}">
-                            Feedback message goes here...
-                        </blockquote>
+                                <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                                    th:classappend="${currentPage == i} ? 'active blue darken-1' : 'waves-effect'">
+                                    <a th:href="@{/admin/feedbacks(page=${i}, status=${currentStatus})}" th:text="${i + 1}">1</a>
+                                </li>
 
-                        <!-- RESPONSE FORM -->
-                        <form th:action="@{/admin/feedback/respond}" method="post">
-                            <input type="hidden" name="id" th:value="${feedback.id}"/>
+                                <li th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                                    <a th:href="${currentPage < totalPages - 1} ? @{/admin/feedbacks(page=${currentPage + 1}, status=${currentStatus})} : '#'">
+                                        <i class="material-icons">chevron_right</i>
+                                    </a>
+                                </li>
+                            </ul>
 
-                            <div class="input-field">
-                                <i class="material-icons prefix red-text">reply</i>
-                                <textarea id="response"
-                                          name="response"
-                                          class="materialize-textarea"
-                                          required></textarea>
-                                <label for="response">Admin Response</label>
-                            </div>
-
-                            <div class="card-action center-align">
-                                <button type="submit"
-                                        class="btn red darken-1 waves-effect waves-light">
-                                    Send Response
-                                    <i class="material-icons right">send</i>
-                                </button>
-
-                                <br><br>
-
-                                <a th:href="@{/admin/dashboard}" class="grey-text">
-                                    ← Back to Dashboard
-                                </a>
-                            </div>
-                        </form>
-
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-
     </div>
+
+    <script layout:fragment="script">
+        document.addEventListener('DOMContentLoaded', function() {
+            var elems = document.querySelectorAll('.tooltipped');
+            M.Tooltip.init(elems);
+
+            var selects = document.querySelectorAll('select');
+            M.FormSelect.init(selects);
+        });
+    </script>
 </div>
+
+
 
 </body>
 </html>
