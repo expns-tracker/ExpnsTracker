@@ -3,153 +3,196 @@ package org.expns_tracker.ExpnsTracker.scheduler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import lombok.extern.slf4j.Slf4j;
+import net.javacrumbs.shedlock.core.LockConfiguration;
 import net.javacrumbs.shedlock.core.LockProvider;
 import net.javacrumbs.shedlock.core.SimpleLock;
 import org.expns_tracker.ExpnsTracker.entity.User;
 import org.expns_tracker.ExpnsTracker.repository.UserRepository;
 import org.expns_tracker.ExpnsTracker.service.TinkService;
+import org.expns_tracker.ExpnsTracker.service.TransactionService;
 import org.expns_tracker.ExpnsTracker.service.UserService;
-import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-
-@Slf4j
 @ExtendWith(MockitoExtension.class)
-public class TinkSchedulerTest {
+class TinkSchedulerTest {
+
     @InjectMocks
-    private TinkScheduler scheduler;
+    private TinkScheduler tinkScheduler;
 
     @Mock
     private UserRepository userRepository;
-
-    @Mock
-    private UserService userService;
-
     @Mock
     private TinkService tinkService;
-
     @Mock
     private LockProvider lockProvider;
-
+    @Mock
+    private UserService userService;
+    @Mock
+    private TransactionService transactionService;
     @Mock
     private SimpleLock simpleLock;
 
-
-    List<User> users = new ArrayList<>();
+    private User user;
+    private ObjectNode transactionsJson;
 
     @BeforeEach
-    void setUp() throws ExecutionException, InterruptedException {
-        User user1 = User.builder()
-                .id("user-id-1")
-                .firstName("Test")
-                .lastName("User 1")
-                .email("user1@email.com")
-                .tinkUserId("tink-user-id-1")
+    void setUp() {
+        user = User.builder()
+                .id("user1")
+                .email("test@test.com")
+                .exportStatus("IDLE")
+                .tinkUserId("tink_u1")
                 .build();
 
-        users.add(user1);
-
-        User user2 = User.builder()
-                .id("user-id-2")
-                .firstName("Test")
-                .lastName("User 2")
-                .email("user2@email.com")
-                .tinkUserId("tink-user-id-2")
-                .build();
-
-        users.add(user2);
-
-        ObjectNode rootNode = getTransactions();
-
-        for (User user : users) {
-            lenient().when(userService.getUser(user.getId())).thenReturn(user);
-            lenient().when(tinkService.getUserAccessCode(user.getTinkUserId())).thenReturn("code-"+user.getId());
-            lenient().when(tinkService.getAccessToken("code-"+user.getId())).thenReturn("token-"+user.getId());
-            lenient().when(tinkService.fetchTransactions("token-"+user.getId(), null)).thenReturn(rootNode);
-        }
-        lenient().when(lockProvider.lock(any())).thenReturn(Optional.of(simpleLock));
-        when(userRepository.findAllByTinkUserIdNotNull()).thenReturn(users);
-    }
-
-    @AfterEach
-    void tearDown() {
-        users.clear();
-    }
-
-    @Test
-    void syncAllUsers_Success() {
-
-        scheduler.syncAllUsers();
-
-        verify(tinkService).getUserAccessCode("tink-user-id-1");
-        verify(tinkService).getAccessToken("code-user-id-1");
-        verify(tinkService).fetchTransactions("token-user-id-1", null);
-
-        verify(tinkService).getUserAccessCode("tink-user-id-2");
-        verify(tinkService).getAccessToken("code-user-id-2");
-        verify(tinkService).fetchTransactions("token-user-id-2", null);
-
-        verifyNoMoreInteractions(tinkService);
-
-    }
-
-    @Test
-    void syncAllUsers_FirstUserFailure() {
-        when(tinkService.getUserAccessCode("tink-user-id-1"))
-                .thenThrow(new RuntimeException("Tink API down for user 1"));
-
-        scheduler.syncAllUsers();
-
-        verify(tinkService, never()).getAccessToken("code-user-id-1");
-
-        verify(tinkService).getUserAccessCode("tink-user-id-2");
-        verify(tinkService).getAccessToken("code-user-id-2");
-        verify(tinkService).fetchTransactions("token-user-id-2", null);
-
-        verifyNoMoreInteractions(tinkService);
-    }
-
-    @NotNull
-    private static ObjectNode getTransactions() {
         ObjectMapper mapper = new ObjectMapper();
+        transactionsJson = mapper.createObjectNode();
+        ArrayNode txArray = mapper.createArrayNode();
+        transactionsJson.set("transactions", txArray);
+        transactionsJson.put("nextPageToken", "");
+    }
 
-        ObjectNode transaction1 = mapper.createObjectNode();
-        transaction1.put("id", "t12345");
-        transaction1.put("accountId", "acc_999");
-        transaction1.put("amount", 150.50);
-        transaction1.put("description", "Starbucks Coffee");
-        transaction1.put("date", "2025-12-09");
-        transaction1.put("pending", false);
+    @Test
+    @DisplayName("syncAllUsers: Should sync all users when lock is acquired")
+    void syncAllUsers_Success() throws ExecutionException, InterruptedException {
+        when(userRepository.findAllByTinkUserIdNotNull()).thenReturn(List.of(user));
 
-        ObjectNode transaction2 = mapper.createObjectNode();
-        transaction2.put("id", "t67890");
-        transaction2.put("accountId", "acc_999");
-        transaction2.put("amount", -25.00);
-        transaction2.put("description", "Netflix Subscription");
-        transaction2.put("date", "2025-12-08");
-        transaction2.put("pending", true);
+        when(lockProvider.lock(any(LockConfiguration.class))).thenReturn(Optional.of(simpleLock));
 
-        ArrayNode resultsArray = mapper.createArrayNode();
-        resultsArray.add(transaction1);
-        resultsArray.add(transaction2);
+        when(tinkService.getUserAccessCode("tink_u1")).thenReturn("auth_code");
+        when(tinkService.getAccessToken("auth_code")).thenReturn("access_token");
+        when(tinkService.fetchTransactions("access_token", null)).thenReturn(transactionsJson);
+        when(userService.getUser(user.getId())).thenReturn(user);
+        doNothing().when(userService).save(any(User.class));
+        doNothing().when(transactionService).saveTinkTransactions(any(), any());
 
-        ObjectNode rootNode = mapper.createObjectNode();
-        rootNode.set("transactions", resultsArray);
-        rootNode.put("nextPageToken", "");
-        return rootNode;
+        tinkScheduler.syncAllUsers();
+
+        verify(tinkService).fetchTransactions("access_token", null);
+        verify(transactionService).saveTinkTransactions(transactionsJson, "user1");
+        verify(simpleLock).unlock();
+    }
+
+    @Test
+    @DisplayName("syncAllUsers: Should skip user if lock is not acquired")
+    void syncAllUsers_LockBusy() throws ExecutionException, InterruptedException {
+        // Arrange
+        when(userRepository.findAllByTinkUserIdNotNull()).thenReturn(List.of(user));
+        when(lockProvider.lock(any(LockConfiguration.class))).thenReturn(Optional.empty());
+
+        tinkScheduler.syncAllUsers();
+
+        verify(tinkService, never()).getUserAccessCode(anyString());
+        verify(lockProvider).lock(any());
+    }
+
+    @Test
+    @DisplayName("syncAllUsers: Should handle exception during user sync gracefully")
+    void syncAllUsers_Exception() throws ExecutionException, InterruptedException {
+
+        when(userRepository.findAllByTinkUserIdNotNull()).thenReturn(List.of(user));
+        when(lockProvider.lock(any())).thenReturn(Optional.of(simpleLock));
+
+        when(tinkService.getUserAccessCode("tink_u1")).thenThrow(new RuntimeException("API Error"));
+        when(userService.getUser(user.getId())).thenReturn(user);
+        doNothing().when(userService).save(any(User.class));
+
+        tinkScheduler.syncAllUsers();
+
+
+        verify(tinkService).getUserAccessCode("tink_u1");
+        verify(transactionService, never()).saveTinkTransactions(any(), any());
+        verify(simpleLock).unlock();
+    }
+
+    @Test
+    @DisplayName("syncAllUsers: Should handle pagination")
+    void syncAllUsers_Pagination() throws ExecutionException, InterruptedException {
+
+        when(userRepository.findAllByTinkUserIdNotNull()).thenReturn(List.of(user));
+        when(lockProvider.lock(any())).thenReturn(Optional.of(simpleLock));
+        when(tinkService.getUserAccessCode("tink_u1")).thenReturn("code");
+        when(tinkService.getAccessToken("code")).thenReturn("token");
+
+        ObjectNode page1 = transactionsJson.deepCopy();
+        page1.put("nextPageToken", "page_2_token");
+
+        ObjectNode page2 = transactionsJson.deepCopy();
+        page2.put("nextPageToken", "");
+
+        when(tinkService.fetchTransactions("token", null)).thenReturn(page1);
+        when(tinkService.fetchTransactions("token", "page_2_token")).thenReturn(page2);
+        when(userService.getUser(user.getId())).thenReturn(user);
+        doNothing().when(userService).save(any(User.class));
+        doNothing().when(transactionService).saveTinkTransactions(any(), any());
+
+        tinkScheduler.syncAllUsers();
+
+        verify(tinkService, times(2)).fetchTransactions(eq("token"), any());
+        verify(transactionService, times(2)).saveTinkTransactions(any(), eq("user1"));
+    }
+
+    @Test
+    @DisplayName("syncAllUsers: Should handle DB error fetching users")
+    void syncAllUsers_DbError() throws ExecutionException, InterruptedException {
+        when(userRepository.findAllByTinkUserIdNotNull()).thenThrow(new ExecutionException(new RuntimeException("DB Down")));
+
+        assertThrows(RuntimeException.class, () -> tinkScheduler.syncAllUsers());
+    }
+
+    @Test
+    @DisplayName("syncSingleUser: Should throw exception if lock is busy")
+    void syncSingleUser_LockBusy() {
+        when(userService.getUser("user1")).thenReturn(user);
+        when(lockProvider.lock(any())).thenReturn(Optional.empty());
+
+        assertThrows(IllegalStateException.class, () -> tinkScheduler.syncSingleUser("user1"));
+    }
+
+    @Test
+    @DisplayName("syncSingleUser: Should start async sync when lock acquired")
+    void syncSingleUser_Success() throws InterruptedException {
+        when(userService.getUser("user1")).thenReturn(user);
+        when(lockProvider.lock(any())).thenReturn(Optional.of(simpleLock));
+
+        when(tinkService.getUserAccessCode("tink_u1")).thenReturn("code");
+        when(tinkService.getAccessToken("code")).thenReturn("token");
+        when(tinkService.fetchTransactions("token", null)).thenReturn(transactionsJson);
+
+        tinkScheduler.syncSingleUser("user1");
+
+        Thread.sleep(100);
+
+        verify(tinkService).fetchTransactions("token", null);
+        verify(simpleLock).unlock();
+    }
+
+    @Test
+    @DisplayName("syncSingleUser: Should handle exception in background thread")
+    void syncSingleUser_AsyncException() throws InterruptedException {
+        when(userService.getUser("user1")).thenReturn(user);
+        when(lockProvider.lock(any())).thenReturn(Optional.of(simpleLock));
+        when(tinkService.getUserAccessCode("tink_u1")).thenThrow(new RuntimeException("Async Error"));
+
+        tinkScheduler.syncSingleUser("user1");
+
+        Thread.sleep(100);
+
+        verify(tinkService).getUserAccessCode("tink_u1");
+        verify(simpleLock).unlock();
     }
 }
