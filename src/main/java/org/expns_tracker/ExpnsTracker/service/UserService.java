@@ -1,10 +1,15 @@
 package org.expns_tracker.ExpnsTracker.service;
 
 import lombok.RequiredArgsConstructor;
+import org.expns_tracker.ExpnsTracker.config.ApplicationProperties;
 import org.expns_tracker.ExpnsTracker.entity.User;
+import org.expns_tracker.ExpnsTracker.entity.enums.Role;
 import org.expns_tracker.ExpnsTracker.repository.TransactionRepository;
 import org.expns_tracker.ExpnsTracker.repository.UserRepository;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 
 @Service
@@ -12,7 +17,7 @@ import org.springframework.stereotype.Service;
 public class UserService {
     private final UserRepository userRepository;
     private final TinkService tinkService;
-    private final TransactionRepository transactionRepository;
+    private final ApplicationProperties applicationProperties;
 
 
     public String getTinkUserId(String userId) {
@@ -48,6 +53,42 @@ public class UserService {
     }
 
     public void save(User user) {
+        userRepository.save(user);
+    }
+
+    public List<User> getAllUsers() {
+        try {
+            return userRepository.findAll();
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void toggleUserStatus(String userId) {
+        User user = getUser(userId);
+
+        if (user.getEmail().equals(applicationProperties.getSuperadmin())){
+            throw new IllegalStateException("Cannot make the superadmin user inactive");
+        }
+
+        user.setIsActive(!user.getIsActive());
+        userRepository.save(user);
+    }
+
+    public void promoteToAdmin(String userId) {
+        User user = getUser(userId);
+        user.setRole(Role.ADMIN);
+        userRepository.save(user);
+    }
+
+    public void revokeAdminRole(String userId) {
+        User user = getUser(userId);
+
+        if (user.getEmail().equals(applicationProperties.getSuperadmin())){
+            throw new IllegalStateException("Cannot revoke admin role for the superadmin user");
+        }
+
+        user.setRole(Role.USER);
         userRepository.save(user);
     }
 }

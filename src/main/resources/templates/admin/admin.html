@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/admin_layout}">
+<head>
+    <title>Admin Dashboard</title>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .admin-background {
+            background: linear-gradient(135deg, #ffebee, #ffcdd2);
+            min-height: 100vh;
+            padding-bottom: 50px;
+        }
+        .stat-card {
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div layout:fragment="content">
+    <div class="admin-background" style="padding-top: 30px;">
+        <div class="container">
+
+            <!-- HEADER -->
+            <div class="row">
+                <div class="col s12">
+                    <h4 class="red-text text-darken-3">
+                        <i class="material-icons left">admin_panel_settings</i>
+                        Admin Dashboard
+                    </h4>
+                </div>
+            </div>
+
+            <!-- STATS (Dynamic) -->
+            <div class="row">
+                <div class="col s12 m6 l3">
+                    <div class="card hoverable red lighten-4 center-align">
+                        <div class="card-content">
+                            <i class="material-icons red-text large">group</i>
+                            <h6>Total Users</h6>
+                            <h5 th:text="${totalUsers ?: 0}">0</h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="col s12 m6 l3">
+                    <div class="card hoverable red lighten-3 center-align">
+                        <div class="card-content">
+                            <i class="material-icons red-text large">person_off</i>
+                            <h6>Inactive</h6>
+                            <h5 th:text="${inactiveUsers ?: 0}">0</h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="col s12 m6 l3">
+                    <div class="card hoverable red lighten-2 center-align">
+                        <div class="card-content">
+                            <i class="material-icons red-text large">verified_user</i>
+                            <h6>Admins</h6>
+                            <h5 th:text="${adminCount ?: 0}">0</h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="col s12 m6 l3">
+                    <div class="card hoverable red darken-1 white-text center-align">
+                        <div class="card-content">
+                            <i class="material-icons white-text large">storage</i>
+                            <h6>System Load</h6>
+                            <h5>Ok</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- USER MANAGEMENT TABLE -->
+            <div class="card hoverable">
+                <div class="card-content">
+                    <span class="card-title red-text text-darken-2">
+                        <i class="material-icons left">manage_accounts</i>
+                        User Management
+                    </span>
+
+                    <!-- Search Bar -->
+                    <div class="row">
+                        <form th:action="@{/admin}" method="get">
+                            <div class="input-field col s12 m6">
+                                <i class="material-icons prefix">search</i>
+                                <input id="search" type="text" name="query" th:value="${query}" placeholder="Search by email or name...">
+                            </div>
+                            <div class="input-field col s12 m6">
+                                <button class="btn red darken-1 waves-effect waves-light" type="submit">Search</button>
+                                <a th:href="@{/admin}" class="btn-flat grey-text">Reset</a>
+                            </div>
+                        </form>
+                    </div>
+
+                    <table class="highlight responsive-table">
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th class="center-align">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="user : ${users}">
+                            <td th:text="${user.name}">John Doe</td>
+                            <td th:text="${user.email}">john@example.com</td>
+                            <td>
+                                <span class="badge"
+                                      th:classappend="${user.role.name().equals('ADMIN')} ? 'red white-text' : 'grey lighten-2'"
+                                      th:text="${user.getEmail().equals(superadmin)?'SUPERADMIN':user.role}">USER</span>
+                            </td>
+                            <td>
+                                <span class="new badge" data-badge-caption=""
+                                      th:classappend="${user.isActive} ? 'green' : 'red'"
+                                      th:text="${user.isActive ? 'Active' : 'Inactive'}">Active</span>
+                            </td>
+                            <td class="center-align">
+                                <!-- Deactivate / Activate -->
+                                <form th:action="@{/admin/users/toggle-status}" method="post" style="display:inline;">
+                                    <input type="hidden" name="userId" th:value="${user.id}" />
+                                    <button type="submit" class="btn-small waves-effect waves-light"
+                                            th:classappend="${user.isActive} ? 'red' : 'green'"
+                                            th:text="${user.isActive ? 'Deactivate' : 'Activate'}"
+                                            th:disabled="${user.getEmail().equals(superadmin) || user.getEmail().equals(currentUser.getEmail())}">Deactivate>
+                                        Deactivate
+                                    </button>
+                                </form>
+
+                                <!-- Promote to Admin (Only if not already admin) -->
+                                <form th:if="${!user.role.name().equals('ADMIN')}" th:action="@{/admin/users/promote}" method="post" style="display:inline; margin-left: 5px;"
+                                      onsubmit="return confirm('Are you sure you want to promote this user to Admin?');">
+                                    <input type="hidden" name="userId" th:value="${user.id}" />
+                                    <button type="submit" class="btn-small blue darken-2 waves-effect waves-light tooltipped"
+                                            data-position="top" data-tooltip="Promote to Admin">
+                                        <i class="material-icons">security</i>
+                                    </button>
+                                </form>
+
+                                <form th:if="${user.role.name().equals('ADMIN')}" th:action="@{/admin/users/demote}" method="post" style="display:inline; margin-left: 5px;"
+                                      onsubmit="return confirm('Are you sure you want to revoke the Admin role for this user?');">
+                                    <input type="hidden" name="userId" th:value="${user.id}" />
+                                    <button type="submit" class="btn-small yellow darken-2 waves-effect waves-light tooltipped"
+                                            data-position="top" data-tooltip="Revoke Admin role"
+                                            th:disabled="${user.getEmail().equals(superadmin) || user.getEmail().equals(currentUser.getEmail())}">
+                                        <i class="material-icons">remove_moderator</i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(users)}">
+                            <td colspan="5" class="center-align grey-text">No users found.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
