@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
+
+<head>
+    <title>Feedback Conversation</title>
+</head>
+
+<body>
+
+<div layout:fragment="content">
+    <div class="container" style="margin-top:40px;">
+
+        <h4 class="blue-text text-darken-2">
+            <i class="material-icons left">chat</i>
+            Feedback Conversation
+        </h4>
+
+        <div class="card hoverable">
+            <div class="card-content">
+
+                <p>
+                    <strong>Category:</strong>
+                    <span class="new badge blue"
+                          th:text="${feedback.category}"
+                          data-badge-caption=""></span>
+                </p>
+
+                <p>
+                    <strong>Status:</strong>
+                    <span class="new badge green"
+                          th:text="${feedback.status}">Responded</span>
+                </p>
+
+                <div class="divider" style="margin:20px 0;"></div>
+
+                <!-- CHAT -->
+                <div th:each="msg : ${messages}" style="margin-bottom:10px;">
+                    <blockquote th:classappend="${msg.fromAdmin} ? 'right-align blue lighten-5' : 'left-align'"
+                                style="padding:10px;">
+                        <strong th:text="${msg.fromAdmin ? 'Admin' : 'You'}"></strong>:
+                        <span th:text="${msg.message}"></span>
+                    </blockquote>
+                </div>
+
+                <!-- USER RESPONSE -->
+                <form th:action="@{/feedback/respond}" method="post">
+                    <input type="hidden" name="feedbackId" th:value="${feedback.id}"/>
+
+                    <div class="input-field">
+                        <i class="material-icons prefix grey-text">chat</i>
+                        <textarea name="message"
+                                  class="materialize-textarea"
+                                  required></textarea>
+                        <label>Your reply</label>
+                    </div>
+
+                    <div class="card-action center-align"
+                         style="border-top:none;">
+                        <button class="btn blue darken-1 waves-effect waves-light">
+                            Send
+                            <i class="material-icons right">send</i>
+                        </button>
+
+                        <br><br>
+
+                        <a th:href="@{/feedback}" class="grey-text">
+                            ← Back to Feedback
+                        </a>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>
