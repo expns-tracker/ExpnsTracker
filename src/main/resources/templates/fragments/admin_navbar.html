@@ -1,11 +1,15 @@
-<nav class="blue darken-2 z-depth-2" th:fragment="navbar">
+<nav class="red darken-2 z-depth-2" th:fragment="navbar">
     <div class="nav-wrapper container">
-        <a href="/" class="brand-logo"><i class="material-icons left">account_balance_wallet</i>ExpnsTracker</a>
+        <a href="/admin" class="brand-logo"><i class="material-icons left">account_balance_wallet</i>ExpnsTracker</a>
         <a href="#" data-target="mobile-menu" class="sidenav-trigger"><i class="material-icons">menu</i></a>
 
         <ul id="nav-mobile" class="right hide-on-med-and-down">
-            <li th:if="${currentUser != null}" th:classappend="${activePage == 'transactions'} ? 'active'"><a href="/transactions"><i class="material-icons left">list</i>Transactions</a></li>
-            <li th:if="${currentUser != null}" th:classappend="${activePage == 'reports'} ? 'active'"><a href="/reports"><i class="material-icons left">assignment</i>Reports</a></li>
+            <li th:if="${currentUser != null}">
+                <a href="/">
+                    <i class="material-icons left">web</i>
+                    <span>Go to site</span>
+                </a>
+            </li>
 
             <!-- User Profile Dropdown -->
             <li th:if="${currentUser != null}">
@@ -31,18 +35,7 @@
         <li>
             <a href="#" onclick="toggleDarkMode()"><i class="material-icons">dark_mode</i>Dark Mode</a>
         </li>
-        <li th:if="${currentUser != null}">
-            <a href="/feedback">
-                <i class="material-icons left">feedback</i>Feedback
-            </a>
-        </li>
 
-        <li th:if="${currentUser != null && currentUser.role.name().equals('ADMIN')}">
-            <a href="/admin">
-                <i class="material-icons left">admin_panel_settings</i>
-                Admin Mode
-            </a>
-        </li>
         <li class="divider"></li>
         <li>
             <a th:href="@{/logout}" class="red-text" >
@@ -54,30 +47,16 @@
     <!-- Mobile Menu -->
     <ul class="sidenav" id="mobile-menu">
 
-        <li th:if="${currentUser != null}"><a href="/"><i class="material-icons left">dashboard</i>Home</a></li>
-        <li th:if="${currentUser != null}"><a href="/transactions"><i class="material-icons left">list</i>Transactions</a></li>
-        <li th:if="${currentUser != null}"><a href="/reports"><i class="material-icons left">assignment</i>Reports</a></li>
+        <li th:if="${currentUser != null}"><a href="/"><i class="material-icons left">website</i>Go to site</a></li>
 
         <li th:if="${currentUser != null}"><a href="/profile"><i class="material-icons">person</i>Profile</a></li>
         <li th:if="${currentUser != null}"><a href="/profile/settings"><i class="material-icons">settings</i>Settings</a></li>
-        <li th:if="${currentUser != null}">
-            <a href="/feedback">
-                <i class="material-icons left">feedback</i>Feedback
-            </a>
-        </li>
 
         <li class="divider"></li>
         <li>
             <a href="#" onclick="toggleDarkMode()"><i class="material-icons">dark_mode</i>Dark Mode</a>
         </li>
         <li class="divider"></li>
-        <!-- ADMIN MODE -->
-        <li th:if="${currentUser != null && currentUser.role.name().equals('ADMIN')}">
-            <a href="/admin">
-                <i class="material-icons left">admin_panel_settings</i>
-                Admin Mode
-            </a>
-        </li>
         <li th:if="${currentUser != null}">
             <a th:href="@{/logout}" class="red-text" >
                 <i class="material-icons left">logout</i>Logout
