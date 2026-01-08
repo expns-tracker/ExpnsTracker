@@ -6,6 +6,7 @@ import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseToken;
 import jakarta.servlet.http.HttpSession;
 import org.expns_tracker.ExpnsTracker.entity.User;
+import org.expns_tracker.ExpnsTracker.entity.enums.Role;
 import org.expns_tracker.ExpnsTracker.repository.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -70,7 +71,9 @@ class AuthServiceTest {
 
         when(userRepository.findById(uid)).thenReturn(null);
 
-//        doNothing().when(userRepository).save(any(User.class));
+        when(userRepository.save(any(User.class))).thenReturn(
+                User.builder().id(uid).email(email).role(Role.USER).build()
+        );
 
         authService.authenticateUser(rawToken, session);
 
@@ -105,7 +108,7 @@ class AuthServiceTest {
         when(mockToken.getEmail()).thenReturn(email);
         when(firebaseAuthMock.verifyIdToken(rawToken)).thenReturn(mockToken);
 
-        User existingUser = User.builder().id(uid).email(email).build();
+        User existingUser = User.builder().id(uid).email(email).role(Role.USER).build();
         when(userRepository.findById(uid)).thenReturn(existingUser);
 
         authService.authenticateUser(rawToken, session);
